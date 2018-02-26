@@ -1,14 +1,15 @@
 <?php
 namespace Rexlabs\HyperHttp;
 
+use Concat\Http\Middleware\Logger;
 use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Psr7\Stream;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerTrait;
 use Psr\Log\NullLogger;
 use Rexlabs\ArrayObject\ArrayObject;
 use Rexlabs\HyperHttp\Exceptions\RequestException;
@@ -17,14 +18,17 @@ use Rexlabs\HyperHttp\Message\Request;
 use Rexlabs\HyperHttp\Message\Response;
 
 /**
- * Hyper Client
- * @author Jodie Dunlop <jodie.dunlop@rexsoftware.com.au>
+ * Hyper HTTP Client
+ * @author        Jodie Dunlop <jodie.dunlop@rexsoftware.com.au>
  * @copyright (c) 2018 Rex Software Pty Ltd.
- * @license MIT
- * @package Rexlabs\HyperHttp
+ * @license       MIT
+ * @mixin         \Rexlabs\ArrayObject\ArrayObject
+ * @package       Rexlabs\HyperHttp
  */
 class Client implements LoggerAwareInterface
 {
+    use LoggerTrait;
+
     /** @var array */
     protected $config;
 
@@ -53,10 +57,33 @@ class Client implements LoggerAwareInterface
         $this->setLogger($logger);
     }
 
+    /**
+     * @param array                $config
+     * @param GuzzleClient|null    $guzzle
+     * @param LoggerInterface|null $logger
+     * @return static
+     * @throws \InvalidArgumentException
+     */
     public static function make(array $config = [], GuzzleClient $guzzle = null, LoggerInterface $logger = null)
     {
         $guzzleConfig = $config['guzzle'] ?? [];
         unset($config['guzzle']);
+
+        // May not provide both guzzle config and a guzzle client.
+        // Since Guzzle is not configurable after initialisation.
+        if (!empty($guzzleConfig) && $guzzle !== null) {
+            throw new \InvalidArgumentException('Cannot provide both guzzle client and config');
+        }
+
+        // Setup logging middleware when a logger is passed.
+        if ($guzzle === null && $logger !== null) {
+            if (!isset($guzzleConfig['handler'])) {
+                $guzzleConfig['handler'] = HandlerStack::create();
+            }
+            $loggerMiddleware = new Logger($logger);
+            $loggerMiddleware->setRequestLoggingEnabled(true);
+            $guzzleConfig['handler']->push($loggerMiddleware);
+        }
 
         return new static($config, $guzzle ?? new GuzzleClient($guzzleConfig), $logger ?? new NullLogger);
     }
@@ -71,40 +98,29 @@ class Client implements LoggerAwareInterface
      */
     public function get($uri, array $query = [], $body = null, array $headers = [], array $options = [])
     {
-        return $this->call(
-            'GET',
-            $this->makeUri($uri)->withQuery(http_build_query($query, null, '&')),
-            $body,
-            $headers,
-            $options
-        );
+        return $this->call('GET', $this->makeUri($uri)->withQuery(http_build_query($query, null, '&')), $body, $headers,
+            $options);
     }
 
     /**
      * Post JSON
-     * @param string|UriInterface     $uri
-     * @param mixed $body
-     * @param array $headers
-     * @param array $options
+     * @param string|UriInterface $uri
+     * @param mixed               $body
+     * @param array               $headers
+     * @param array               $options
      * @return Response
      */
     public function post($uri, $body, array $headers = [], array $options = [])
     {
         // TODO: This sending json: automatically set headers?
-        return $this->call(
-            'POST',
-            $uri,
-            \is_array($body) ? json_encode($body) : $body,
-            $headers,
-            $options
-        );
+        return $this->call('POST', $uri, \is_array($body) ? json_encode($body) : $body, $headers, $options);
     }
 
     /**
-     * @param string|UriInterface     $uri
-     * @param array $params
-     * @param array $headers
-     * @param array $options
+     * @param string|UriInterface $uri
+     * @param array               $params
+     * @param array               $headers
+     * @param array               $options
      * @return Response
      */
     public function postForm($uri, array $params = [], array $headers = [], array $options = [])
@@ -116,10 +132,10 @@ class Client implements LoggerAwareInterface
     }
 
     /**
-     * @param string|UriInterface     $uri
-     * @param array $formParams
-     * @param array $headers
-     * @param array $options
+     * @param string|UriInterface $uri
+     * @param array               $formParams
+     * @param array               $headers
+     * @param array               $options
      * @return Response
      */
     public function postMultipartForm($uri, array $formParams = [], array $headers = [], array $options = [])
@@ -131,21 +147,15 @@ class Client implements LoggerAwareInterface
     }
 
     /**
-     * @param string|UriInterface     $uri
-     * @param mixed $body
+     * @param string|UriInterface $uri
+     * @param mixed               $body
      * @param array               $headers
      * @param array               $options
      * @return Response
      */
     public function put($uri, $body, array $headers = [], array $options = [])
     {
-        return $this->call(
-            'PUT',
-            $uri,
-            \is_array($body) ? json_encode($body) : $body,
-            $headers,
-            $options
-        );
+        return $this->call('PUT', $uri, \is_array($body) ? json_encode($body) : $body, $headers, $options);
     }
 
     /**
@@ -157,13 +167,7 @@ class Client implements LoggerAwareInterface
      */
     public function patch($uri, $body, array $headers = [], array $options = [])
     {
-        return $this->call(
-            'PATCH',
-            $uri,
-            \is_array($body) ? json_encode($body) : $body,
-            $headers,
-            $options
-        );
+        return $this->call('PATCH', $uri, \is_array($body) ? json_encode($body) : $body, $headers, $options);
     }
 
     /**
@@ -207,7 +211,7 @@ class Client implements LoggerAwareInterface
 
         // TODO: Can we switch the response to our own??
 
-            // Provide an opportunity for a callback to massage the RAW response body
+        // Provide an opportunity for a callback to massage the RAW response body
 //            $body = $this->fireRawResponseDataCallback($body);
 //            $body = $this->fireResponseDataCallback($body);
 
@@ -232,8 +236,8 @@ class Client implements LoggerAwareInterface
             $headers['Accept'] = 'application/json';
         }
 
-        $request = new \GuzzleHttp\Psr7\Request($this->sanitizeMethod($method), $this->makeUri($uri), $headers, $body ?? null,
-            $version ?? 1.1);
+        $request = new \GuzzleHttp\Psr7\Request($this->sanitizeMethod($method), $this->makeUri($uri), $headers,
+            $body ?? null, $version ?? 1.1);
 
         return Request::fromRequest($request);
     }
@@ -438,56 +442,10 @@ class Client implements LoggerAwareInterface
         return $this;
     }
 
-    /**
-     * @param callable $callback
-     * @return $this
-     */
-    public function onRawResponseData(callable $callback)
+    public function log($level, $message, array $context = [])
     {
-        $this->rawResponseDataCallback = $callback;
-
-        return $this;
+        $this->getLogger()->log($level, $message, $context);
     }
-
-    /**
-     * @param callable $callback
-     * @return $this
-     */
-    public function onResponseData(callable $callback)
-    {
-        $this->responseDataCallback = $callback;
-
-        return $this;
-    }
-
-
-
-    /**
-     * @param $data
-     * @return mixed
-     */
-    protected function fireRawResponseDataCallback($data)
-    {
-        if ($this->rawResponseDataCallback !== null && \is_callable($this->rawResponseDataCallback)) {
-            return \call_user_func($this->rawResponseDataCallback, $data);
-        }
-
-        return $data;
-    }
-
-    /**
-     * @param mixed $data
-     * @return mixed
-     */
-    protected function fireResponseDataCallback($data)
-    {
-        if ($this->responseDataCallback !== null && \is_callable($this->responseDataCallback)) {
-            return \call_user_func($this->responseDataCallback, $data);
-        }
-
-        return $data;
-    }
-
 
     protected function combineHeaders($headers)
     {
@@ -508,8 +466,15 @@ class Client implements LoggerAwareInterface
         return new Uri($this->url($uri));
     }
 
-    protected function convertRequest(RequestInterface $request)
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws \InvalidArgumentException
+     */
+    public static function __callStatic($name, $arguments)
     {
-        $request->getBody();
+        $client = static::make();
+        return \call_user_func_array([$client, $name], $arguments);
     }
 }

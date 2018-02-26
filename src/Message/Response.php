@@ -4,7 +4,6 @@ namespace Rexlabs\HyperHttp\Message;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Rexlabs\ArrayObject\ArrayObject;
-use Rexlabs\HyperHttp\Exceptions\ResponseException;
 
 class Response extends \GuzzleHttp\Psr7\Response
 {
@@ -26,7 +25,7 @@ class Response extends \GuzzleHttp\Psr7\Response
     }
 
     /**
-     * @return null|RequestInterface
+     * @return null|RequestInterface|Request
      */
     public function getRequest()
     {

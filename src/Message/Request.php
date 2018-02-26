@@ -1,6 +1,7 @@
 <?php
 namespace Rexlabs\HyperHttp\Message;
 
+use Namshi\Cuzzle\Formatter\CurlFormatter;
 use Psr\Http\Message\RequestInterface;
 
 class Request extends \GuzzleHttp\Psr7\Request
@@ -14,5 +15,10 @@ class Request extends \GuzzleHttp\Psr7\Request
             $request->getBody(),
             $request->getProtocolVersion()
         );
+    }
+
+    public function getCurl()
+    {
+        return (new CurlFormatter())->format($this);
     }
 }
