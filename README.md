@@ -22,11 +22,14 @@ $hyperClient->setBaseUri('http://example.com/api/v1')
 // Make a request to the 'http://example.com/api/v1/messages' endpoint
 $response = $hyper->get('/messages');
 
-$body = $response->getBody();
+// The Response object mixes in the Rexlabs\ArrayObject class to provide flient access
+// to JSON responses
+// See: rexlabs\array-object for more details
 
-$obj = $response->getObject();
+$response->title;   // Get the "title" property from the top level response
+$response->get('books.0');  // ArrayObject - the first book in the "books" collection
 
-$obj = $response->data;
+
 ```
 
 Based on the service returning the following JSON data:
