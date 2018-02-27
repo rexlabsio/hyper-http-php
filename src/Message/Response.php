@@ -5,6 +5,11 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Rexlabs\ArrayObject\ArrayObject;
 
+/**
+ * Class Response
+ * @mixin \Rexlabs\ArrayObject\ArrayObject
+ * @package Rexlabs\HyperHttp\Message
+ */
 class Response extends \GuzzleHttp\Psr7\Response
 {
     /** @var RequestInterface */
@@ -93,5 +98,10 @@ class Response extends \GuzzleHttp\Psr7\Response
     public function __isset($name)
     {
         return $this->toObject()->has($name);
+    }
+
+    public function __toString()
+    {
+        return (string)$this->getBody();
     }
 }

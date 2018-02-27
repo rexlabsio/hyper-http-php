@@ -11,7 +11,6 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
 use Psr\Log\NullLogger;
-use Rexlabs\ArrayObject\ArrayObject;
 use Rexlabs\HyperHttp\Exceptions\RequestException;
 use Rexlabs\HyperHttp\Exceptions\ResponseException;
 use Rexlabs\HyperHttp\Message\Request;
@@ -19,13 +18,22 @@ use Rexlabs\HyperHttp\Message\Response;
 
 /**
  * Hyper HTTP Client
+ *
+ * @method static Response call(string $method, string | UriInterface $uri, mixed $body = null, array $headers = [], array $options = [])
+ * @method static Response get(string | UriInterface $uri, array $query = [], mixed|null $body = null, array $headers = [], array $options = [])
+ * @method static Response post(string | UriInterface $uri, mixed|null $body = null, array $headers = [], array $options = [])
+ * @method static Response put(string | UriInterface $uri, mixed|null $body = null, array $headers = [], array $options = [])
+ * @method static Response patch(string | UriInterface $uri, mixed|null $body = null, array $headers = [], array $options = [])
+ * @method static Response delete(string | UriInterface $uri, mixed|null $body = null, array $headers = [], array $options = [])
+ *
  * @author        Jodie Dunlop <jodie.dunlop@rexsoftware.com.au>
  * @copyright (c) 2018 Rex Software Pty Ltd.
  * @license       MIT
- * @mixin         \Rexlabs\ArrayObject\ArrayObject
  * @package       Rexlabs\HyperHttp
+ *
+ *
  */
-class Client implements LoggerAwareInterface
+class Hyper implements LoggerAwareInterface
 {
     use LoggerTrait;
 
@@ -50,14 +58,16 @@ class Client implements LoggerAwareInterface
     /** @var callable */
     protected $responseDataCallback;
 
-    public function __construct(array $config = [], GuzzleClient $guzzle, LoggerInterface $logger)
+    public function __construct(GuzzleClient $guzzle, LoggerInterface $logger, array $config = [])
     {
-        $this->setConfig($config);
         $this->setGuzzleClient($guzzle);
         $this->setLogger($logger);
+        $this->setConfig($config);
     }
 
     /**
+     * Makes a new instance of the class, with appropriate defaults.
+     * You can optionally pass in configuration options, a Guzzle client instance and/or a logger.
      * @param array                $config
      * @param GuzzleClient|null    $guzzle
      * @param LoggerInterface|null $logger
@@ -81,14 +91,30 @@ class Client implements LoggerAwareInterface
                 $guzzleConfig['handler'] = HandlerStack::create();
             }
             $loggerMiddleware = new Logger($logger);
-            $loggerMiddleware->setRequestLoggingEnabled(true);
+            $loggerMiddleware->setRequestLoggingEnabled();
             $guzzleConfig['handler']->push($loggerMiddleware);
         }
 
-        return new static($config, $guzzle ?? new GuzzleClient($guzzleConfig), $logger ?? new NullLogger);
+        return new static($guzzle ?? new GuzzleClient($guzzleConfig), $logger ?? new NullLogger, $config);
     }
 
     /**
+     * Route static calls to an instance of the class.
+     * Makes it possible to call class::get() etc. without making an instance first.
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws \InvalidArgumentException
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        $client = static::make();
+
+        return \call_user_func_array([$client, $name], $arguments);
+    }
+
+    /**
+     * Make a GET request and return a Response object.
      * @param string|UriInterface $uri
      * @param array               $query GET query options
      * @param mixed|null          $body
@@ -96,109 +122,116 @@ class Client implements LoggerAwareInterface
      * @param array               $options
      * @return Response
      */
-    public function get($uri, array $query = [], $body = null, array $headers = [], array $options = [])
+    public function httpGet($uri, array $query = [], $body = null, array $headers = [], array $options = []): Response
     {
-        return $this->call('GET', $this->makeUri($uri)->withQuery(http_build_query($query, null, '&')), $body, $headers,
-            $options);
+        return $this->httpCall('GET', $this->makeUri($uri)->withQuery(http_build_query($query, null, '&')), $body,
+            $headers, $options);
     }
 
     /**
-     * Post JSON
+     * Make a POST request and return a Response object.
      * @param string|UriInterface $uri
      * @param mixed               $body
      * @param array               $headers
      * @param array               $options
      * @return Response
      */
-    public function post($uri, $body, array $headers = [], array $options = [])
+    public function httpPost($uri, $body, array $headers = [], array $options = []): Response
     {
         // TODO: This sending json: automatically set headers?
-        return $this->call('POST', $uri, \is_array($body) ? json_encode($body) : $body, $headers, $options);
+        return $this->httpCall('POST', $uri, \is_array($body) ? json_encode($body) : $body, $headers, $options);
     }
 
     /**
+     * Make a POST request with Form parameters and return a Response object.
      * @param string|UriInterface $uri
      * @param array               $params
      * @param array               $headers
      * @param array               $options
      * @return Response
      */
-    public function postForm($uri, array $params = [], array $headers = [], array $options = [])
+    public function httpPostForm($uri, array $params = [], array $headers = [], array $options = []): Response
     {
         $headers['Content-Type'] = 'application/x-www-form-urlencoded';
         $options['form_params'] = $params;
 
-        return $this->call('POST', $uri, null, $headers, $options);
+        return $this->httpCall('POST', $uri, null, $headers, $options);
     }
 
     /**
+     * Make a multipart POST request with Form parameters and return a Response object.
      * @param string|UriInterface $uri
      * @param array               $formParams
      * @param array               $headers
      * @param array               $options
      * @return Response
      */
-    public function postMultipartForm($uri, array $formParams = [], array $headers = [], array $options = [])
+    public function httpPostMultipartForm($uri, array $formParams = [], array $headers = [], array $options = []): Response
     {
         $headers['Content-Type'] = 'multipart/form-data';
         $options['multipart'] = $formParams;
 
-        return $this->call('POST', $uri, null, $headers, $options);
+        return $this->httpCall('POST', $uri, null, $headers, $options);
     }
 
     /**
+     * Make a PUT request and return a Response object.
      * @param string|UriInterface $uri
      * @param mixed               $body
      * @param array               $headers
      * @param array               $options
      * @return Response
      */
-    public function put($uri, $body, array $headers = [], array $options = [])
+    public function httpPut($uri, $body, array $headers = [], array $options = []): Response
     {
-        return $this->call('PUT', $uri, \is_array($body) ? json_encode($body) : $body, $headers, $options);
+        return $this->httpCall('PUT', $uri, \is_array($body) ? json_encode($body) : $body, $headers, $options);
     }
 
     /**
+     * Make a PATCH request and return a Response object.
      * @param string|UriInterface $uri
      * @param mixed               $body
      * @param array               $headers
      * @param array               $options
      * @return Response
      */
-    public function patch($uri, $body, array $headers = [], array $options = [])
+    public function httpPatch($uri, $body, array $headers = [], array $options = []): Response
     {
-        return $this->call('PATCH', $uri, \is_array($body) ? json_encode($body) : $body, $headers, $options);
+        return $this->httpCall('PATCH', $uri, \is_array($body) ? json_encode($body) : $body, $headers, $options);
     }
 
     /**
+     * Make a DELETE request and return a Response object.
      * @param string|UriInterface $uri
      * @param mixed|null          $body
      * @param array               $headers
      * @param array               $options
-     * @return ArrayObject|mixed
+     * @return Response
      */
-    public function delete($uri, $body = null, array $headers = [], array $options = [])
+    public function httpDelete($uri, $body = null, array $headers = [], array $options = []): Response
     {
         $options['body'] = is_array($body) ? json_encode($body) : $body;
 
-        return $this->call('DELETE', $this->makeUri($uri), $headers, $body ?? null, $options);
+        return $this->httpCall('DELETE', $this->makeUri($uri), $headers, $body ?? null, $options);
 
     }
 
     /**
-     * Make a GET request and return an object from the JSON response
+     * Make a request (with given method) and return a Response object.
      * @param string              $method
      * @param string|UriInterface $uri
      * @param mixed|null          $body
      * @param array               $headers
      * @param array               $options
      * @return Response
+     * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
+     * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
      */
-    public function call($method, $uri, $body = null, array $headers = [], array $options = [])
+    public function httpCall($method, $uri, $body = null, array $headers = [], array $options = []): Response
     {
         try {
             $request = $this->createRequest($method, $this->makeUri($uri), $headers, $body);
-            $response = $this->sendRequest($request, $options);
+            $response = $this->httpSend($request, $options);
 
             // Note: Guzzle will only throw exceptions for status codes when http_errors = true
             // This option only has an effect if your handler has the GuzzleHttp\Middleware::httpErrors middleware
@@ -209,15 +242,18 @@ class Client implements LoggerAwareInterface
             throw new RequestException($e->getMessage(), $e->getCode(), $e);
         }
 
-        // TODO: Can we switch the response to our own??
-
-        // Provide an opportunity for a callback to massage the RAW response body
-//            $body = $this->fireRawResponseDataCallback($body);
-//            $body = $this->fireResponseDataCallback($body);
-
         return $response;
     }
 
+    /**
+     * Create a new request object
+     * @param string $method
+     * @param        $uri
+     * @param array  $headers
+     * @param null   $body
+     * @param null   $version
+     * @return Request
+     */
     public function createRequest(
         string $method,
         $uri,
@@ -225,7 +261,7 @@ class Client implements LoggerAwareInterface
         $body = null,
         $version = null
     ): Request {
-        $headers = $this->combineHeaders($headers ?? []);
+        $headers = $this->mergeHeaders($headers ?? []);
 
         // TODO: if ($this->wantsJson) { ...
         // Supplement headers for JSON
@@ -242,7 +278,13 @@ class Client implements LoggerAwareInterface
         return Request::fromRequest($request);
     }
 
-    public function sendRequest(RequestInterface $request, array $options = []): Response
+    /**
+     * Send a Request object and get a Response
+     * @param RequestInterface $request
+     * @param array            $options
+     * @return Response
+     */
+    public function httpSend(RequestInterface $request, array $options = []): Response
     {
         $this->getLogger()->debug(sprintf('Sending: %s %s', $request->getMethod(), $request->getUri()), $options);
 
@@ -253,7 +295,11 @@ class Client implements LoggerAwareInterface
         return $response;
     }
 
-
+    /**
+     * Prepends the base URI to any non-absolute URI
+     * @param string $uri
+     * @return string
+     */
     public function url($uri)
     {
         $url = $uri;
@@ -269,6 +315,7 @@ class Client implements LoggerAwareInterface
     }
 
     /**
+     * Returns the Logger instance
      * @return LoggerInterface
      */
     public function getLogger(): LoggerInterface
@@ -277,6 +324,7 @@ class Client implements LoggerAwareInterface
     }
 
     /**
+     * Set the Logger instance which will be used to log requests and responses.
      * @param LoggerInterface $logger
      * @return $this
      */
@@ -288,6 +336,7 @@ class Client implements LoggerAwareInterface
     }
 
     /**
+     * Gets the underlying Guzzle client used to transport the requests.
      * @return GuzzleClient
      */
     public function getGuzzleClient(): GuzzleClient
@@ -304,34 +353,6 @@ class Client implements LoggerAwareInterface
         $this->guzzle = $guzzle;
 
         return $this;
-    }
-
-
-    /**
-     * Get the last response
-     * @return Response
-     */
-    public function getResponse(): \GuzzleHttp\Psr7\Response
-    {
-        return $this->response;
-    }
-
-    /**
-     * Return the HTTP status code from the last response
-     * @return int|null
-     */
-    public function getStatusCode()
-    {
-        return isset($this->response) ? $this->response->getStatusCode() : null;
-    }
-
-    /**
-     * Return the HTTP status reason phrase from the last response
-     * @return null|string
-     */
-    public function getReasonPhrase()
-    {
-        return isset($this->response) ? $this->response->getReasonPhrase() : null;
     }
 
     /**
@@ -354,7 +375,7 @@ class Client implements LoggerAwareInterface
         }
 
         // Config may also include headers
-        if (isset($config['headers']) && is_array($config['headers'])) {
+        if (isset($config['headers']) && \is_array($config['headers'])) {
             $this->setHeaders($config['headers']);
             unset($config['headers']);
         }
@@ -409,7 +430,7 @@ class Client implements LoggerAwareInterface
     }
 
     /**
-     * Set (REPLACE) an array (key => value) of headers
+     * Replace the headers with the supplied array (key => value)
      * @param array $headers
      * @return $this
      */
@@ -442,21 +463,61 @@ class Client implements LoggerAwareInterface
         return $this;
     }
 
+    /**
+     * Log a message via the logger
+     * @param       $level
+     * @param       $message
+     * @param array $context
+     */
     public function log($level, $message, array $context = [])
     {
         $this->getLogger()->log($level, $message, $context);
     }
 
-    protected function combineHeaders($headers)
+    /**
+     * Routes missing object methods to http{MethodName}.
+     * This allows get(), put(), patch() etc. to be aliased to httpGet() httpPut() httpPatch() ...
+     * @param $name
+     * @param $arguments
+     * @return Response
+     * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
+     * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
+     */
+    public function __call($name, $arguments)
+    {
+        $httpMethod = 'http' . ucfirst($name);
+        if (method_exists($this, $httpMethod)) {
+            // Call http method
+            return $this->$httpMethod(...$arguments);
+        }
+
+        return $this->httpCall($this->sanitizeMethod($name), ...$arguments);
+    }
+
+    /**
+     * Merges the given headers with the global headers stored in the instance.
+     * @param array $headers
+     * @return array
+     */
+    protected function mergeHeaders(array $headers): array
     {
         return array_merge_recursive($headers, $this->headers);
     }
 
-    protected function sanitizeMethod($method)
+    /**
+     * Sanitizes an HTTP method
+     * @param $method
+     * @return string
+     */
+    protected function sanitizeMethod(string $method): string
     {
         return strtoupper(trim($method));
     }
 
+    /**
+     * @param string|UriInterface $uri
+     * @return Uri|UriInterface
+     */
     protected function makeUri($uri): Uri
     {
         if ($uri instanceof UriInterface) {
@@ -464,17 +525,5 @@ class Client implements LoggerAwareInterface
         }
 
         return new Uri($this->url($uri));
-    }
-
-    /**
-     * @param $name
-     * @param $arguments
-     * @return mixed
-     * @throws \InvalidArgumentException
-     */
-    public static function __callStatic($name, $arguments)
-    {
-        $client = static::make();
-        return \call_user_func_array([$client, $name], $arguments);
     }
 }

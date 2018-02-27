@@ -8,18 +8,18 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LogLevel;
 use Psr\Log\NullLogger;
 use Rexlabs\HyperHttp\Exceptions\ResponseException;
-use Rexlabs\HyperHttp\Client;
+use Rexlabs\HyperHttp\Hyper;
 
-class ClientTest extends TestCase
+class HyperTest extends TestCase
 {
     public function test_constructor_without_arguments()
     {
-        new Client();
+        new Hyper();
     }
 
     public function test_url()
     {
-        $api = Client::make();
+        $api = Hyper::make();
 
         // No trailing slash on base
         $api->setBaseUri('http://example.com/v1');
@@ -42,7 +42,7 @@ class ClientTest extends TestCase
 
     public function test_set_config_after_constructor()
     {
-        $api = Client::make();
+        $api = Hyper::make();
         $api->setConfig([
             'base_uri' => 'http://example.com/v1',
         ]);
@@ -52,14 +52,14 @@ class ClientTest extends TestCase
 
     public function test_guzzle_getter_creates_new_client()
     {
-        $api = Client::make();
+        $api = Hyper::make();
         $this->assertInstanceOf(\GuzzleHttp\Client::class, $api->getGuzzleClient());
     }
 
     public function test_constructor_accepts_guzzle_client()
     {
-        $guzzle = new Client(['timeout' => 222]);
-        $api = new Client([], $guzzle);
+        $guzzle = new Hyper(['timeout' => 222]);
+        $api = new Hyper([], $guzzle);
         $this->assertSame($guzzle, $api->getGuzzleClient());
         $this->assertEquals(222, $api->getGuzzleClient()->getConfig('timeout'));
     }
@@ -67,37 +67,37 @@ class ClientTest extends TestCase
     public function test_constructor_accepts_logger()
     {
         $logger = new NullLogger();
-        $api = new Client([], null, $logger);
+        $api = new Hyper([], null, $logger);
         $this->assertSame($logger, $api->getLogger());
     }
 
     public function test_logger()
     {
-        $api = Client::make();
+        $api = Hyper::make();
         $api->getLogger()->log(LogLevel::ALERT, "Test Log");
     }
 
     public function test_set_base_uri()
     {
-        $api = Client::make();
+        $api = Hyper::make();
         $api->setBaseUri('http://example.com/v1');
         $this->assertEquals('http://example.com/v1', $api->getBaseUri());
     }
 
     public function test_fluent_initialisation()
     {
-        $api = Client::make()
+        $api = Hyper::make()
             ->setBaseUri('http://example.com/v1')
             ->setLogger(new NullLogger())
-            ->setGuzzleClient(new Client());
+            ->setGuzzleClient(new Hyper());
         $this->assertEquals('http://example.com/v1', $api->getBaseUri());
         $this->assertInstanceOf(NullLogger::class, $api->getLogger());
-        $this->assertInstanceOf(Client::class, $api->getGuzzleClient());
+        $this->assertInstanceOf(Hyper::class, $api->getGuzzleClient());
     }
 
     public function test_manipulate_headers()
     {
-        $api = Client::make();
+        $api = Hyper::make();
         $api->setHeader('X-App-Identity', 'MyApplication1234');
         $api->setHeader('X-Another-Header', 'Another Header');
         $this->assertEquals('MyApplication1234', $api->getHeader('X-App-Identity'));
@@ -108,7 +108,7 @@ class ClientTest extends TestCase
 
     public function test_set_multiple_headers()
     {
-        $api = Client::make()->setHeaders([
+        $api = Hyper::make()->setHeaders([
             'X-App-Identity' => 'MyApplication1234',
             'X-Another-Header' => 'Another Header'
         ]);
@@ -118,7 +118,7 @@ class ClientTest extends TestCase
 
     public function test_set_headers_via_constructor()
     {
-        $api = Client::make([
+        $api = Hyper::make([
             'headers' => [
                 'X-App-Identity' => 'MyApplication1234',
                 'X-Another-Header' => 'Another Header'
@@ -138,8 +138,8 @@ class ClientTest extends TestCase
                 'message' => 'hello',
             ]
         ]);
-        $api = Client::make([], $guzzle);
-        $result = $api->get('/message/12345');
+        $api = Hyper::make([], $guzzle);
+        $result = $api->httpGet('/message/12345');
         $this->assertInstanceOf(ArrayObject::class, $result);
         $this->assertEquals([
             'data' => [
@@ -169,8 +169,8 @@ class ClientTest extends TestCase
                 ]
             ]
         ]);
-        $api = new Client([], $guzzle);
-        $result = $api->get('/message/12345');
+        $api = new Hyper([], $guzzle);
+        $result = $api->httpGet('/message/12345');
         $this->assertInstanceOf(DataObject::class, $result);
 
         $message = $result->data;
@@ -188,17 +188,17 @@ class ClientTest extends TestCase
             'Content-Type' => 'application/json',
         ], null);
 
-        $api = Client::make([], $guzzle);
+        $api = Hyper::make([], $guzzle);
         $this->expectException(ResponseException::class);
-        $api->get('/message/1');
+        $api->httpGet('/message/1');
 
         $guzzle = $this->getMockedGuzzle(500, [
             'Content-Type' => 'application/json',
         ], null);
 
-        $api = new Client([], $guzzle);
+        $api = new Hyper([], $guzzle);
         $this->expectException(RequestException::class);
-        $api->get('/message/2');
+        $api->httpGet('/message/2');
 
     }
 
@@ -212,7 +212,7 @@ class ClientTest extends TestCase
                 'message' => 'hello',
             ]
         ]);
-        $api = Client::make([], $guzzle);
+        $api = Hyper::make([], $guzzle);
         $api->onResponseData(function ($data) {
             return [
                 'data' => [
@@ -221,7 +221,7 @@ class ClientTest extends TestCase
                 ]
             ];
         });
-        $result = $api->get('/message/12345');
+        $result = $api->httpGet('/message/12345');
         $this->assertEquals('HELLO', $result->data->message);
         $this->assertEquals(5678 * 2, $result->data->id);
     }
@@ -236,11 +236,11 @@ class ClientTest extends TestCase
                 'message' => 'hello',
             ]
         ]);
-        $api = new Client([], $guzzle);
+        $api = new Hyper([], $guzzle);
         $api->onRawResponseData(function ($data) {
             return str_replace('hello', 'bye', $data);
         });
-        $result = $api->get('/message/12345');
+        $result = $api->httpGet('/message/12345');
         $this->assertEquals("bye", $result->data->message);
     }
 
