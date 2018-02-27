@@ -232,7 +232,7 @@ Send an HTTP DELETE request, and return the Response:
 ```php
 $response = Hyper::delete('https://example.com/fruit', 'apples');
 
-$response = $hyper->delete('/v1/people', ['name' => 'Bob', 'age' => 25]);
+$response = $hyper->delete('/v1/people/1');
 ```
 
 - `$uri` is a string or a `Uri`. If the string is not absolute it will be appended to the base uri.
@@ -364,4 +364,13 @@ $obj = $response->toObject();   // Instance of Arraybject
 To run tests:
 `vendor/bin/phpunit`
 
+## Contributing
 
+Contributions are welcome, please submit a pull-request or create an issue.
+Your submitted code should be formatted using PSR-1/PSR-2 standards.
+
+## About
+
+- Author: [Jodie Dunlop](https://github.com/jodiedunlop)
+- License: [MIT](LICENSE)
+- Copyright (c) 2018 Rex Software Pty Ltd
