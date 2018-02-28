@@ -5,12 +5,12 @@ use Concat\Http\Middleware\Logger;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Uri;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
 use Psr\Log\NullLogger;
+use Rexlabs\HyperHttp\Exceptions\BadConfigurationException;
 use Rexlabs\HyperHttp\Exceptions\RequestException;
 use Rexlabs\HyperHttp\Exceptions\ResponseException;
 use Rexlabs\HyperHttp\Message\Request;
@@ -75,7 +75,7 @@ class Hyper implements LoggerAwareInterface
      * @param GuzzleClient|null    $guzzle
      * @param LoggerInterface|null $logger
      * @return static
-     * @throws \InvalidArgumentException
+     * @throws BadConfigurationException
      */
     public static function make(array $config = [], GuzzleClient $guzzle = null, LoggerInterface $logger = null)
     {
@@ -85,7 +85,7 @@ class Hyper implements LoggerAwareInterface
         // May not provide both guzzle config and a guzzle client.
         // Since Guzzle is not configurable after initialisation.
         if (!empty($guzzleConfig) && $guzzle !== null) {
-            throw new \InvalidArgumentException('Cannot provide both guzzle client and config');
+            throw new BadConfigurationException('Cannot provide both guzzle client and config');
         }
 
         // Setup logging middleware when a logger is passed.
@@ -101,7 +101,20 @@ class Hyper implements LoggerAwareInterface
         return new static($guzzle ?? new GuzzleClient($guzzleConfig), $logger ?? new NullLogger, $config);
     }
 
+    /**
+     * Route static calls to an instance of the class.
+     * Makes it possible to call class::get() etc. without making an instance first.
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws \InvalidArgumentException
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        $client = static::make();
 
+        return \call_user_func_array([$client, $name], $arguments);
+    }
 
     /**
      * Make a GET request and return a Response object.
@@ -127,6 +140,8 @@ class Hyper implements LoggerAwareInterface
      * @param array               $headers
      * @param array               $options
      * @return Response
+     * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
+     * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
      */
     public function httpPost($uri, $body, array $headers = [], array $options = []): Response
     {
@@ -234,8 +249,8 @@ class Hyper implements LoggerAwareInterface
     public function httpCall($method, $uri, $body = null, array $headers = [], array $options = []): Response
     {
         try {
-            $request = $this->createRequest($method, $this->makeUri($uri), $headers, $body);
-            $response = $this->httpSend($request, $options);
+            $request = $this->createRequest($method, $this->makeUri($uri), $headers, $body, null, $options);
+            $response = $this->httpSend($request);
 
             // Note: Guzzle will only throw exceptions for status codes when http_errors = true
             // This option only has an effect if your handler has the GuzzleHttp\Middleware::httpErrors middleware
@@ -256,6 +271,7 @@ class Hyper implements LoggerAwareInterface
      * @param array  $headers
      * @param null   $body
      * @param null   $version
+     * @param array  $options
      * @return Request
      */
     public function createRequest(
@@ -263,7 +279,8 @@ class Hyper implements LoggerAwareInterface
         $uri,
         array $headers = [],
         $body = null,
-        $version = null
+        $version = null,
+        array $options = []
     ): Request {
         $headers = $this->mergeHeaders($headers ?? []);
 
@@ -283,24 +300,25 @@ class Hyper implements LoggerAwareInterface
             }
         }
 
+        // Create a Guzzle request
         $request = new \GuzzleHttp\Psr7\Request($this->sanitizeMethod($method), $this->makeUri($uri), $headers,
             $body ?? null, $version ?? 1.1);
 
-        return Request::fromRequest($request);
+        // Upgrade the Request to our native Request object
+        return Request::fromRequest($request)->setOptions($options);
     }
 
     /**
      * Send a Request object and get a Response
-     * @param RequestInterface $request
-     * @param array            $options
+     * @param Request $request
      * @return Response
      */
-    public function httpSend(RequestInterface $request, array $options = []): Response
+    public function httpSend(Request $request): Response
     {
-        $this->getLogger()->debug(sprintf('Sending: %s %s', $request->getMethod(), $request->getUri()), $options);
+        $this->getLogger()->debug(sprintf('Sending: %s %s', $request->getMethod(), $request->getUri()));
 
         // Send the request and get a response object
-        $response = Response::fromResponse($this->getGuzzleClient()->send($request, $options));
+        $response = Response::fromResponse($this->getGuzzleClient()->send($request, $request->getOptions()));
         $response->setRequest($request);
 
         return $response;
@@ -523,21 +541,6 @@ class Hyper implements LoggerAwareInterface
         }
 
         return $instance->httpCall($instance->sanitizeMethod($name), ...$arguments);
-    }
-
-    /**
-     * Route static calls to an instance of the class.
-     * Makes it possible to call class::get() etc. without making an instance first.
-     * @param $name
-     * @param $arguments
-     * @return mixed
-     * @throws \InvalidArgumentException
-     */
-    public static function __callStatic($name, $arguments)
-    {
-        $client = static::make();
-
-        return \call_user_func_array([$client, $name], $arguments);
     }
 
     /**

@@ -4,6 +4,8 @@ namespace Rexlabs\HyperHttp\Exceptions;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Rexlabs\HyperHttp\Message\Request;
+use Rexlabs\HyperHttp\Message\Response;
 
 class ApiException extends \RuntimeException
 {
@@ -29,8 +31,11 @@ class ApiException extends \RuntimeException
         parent::__construct($message, $code, $previous);
 
         if ($previous instanceof RequestException) {
-            $this->request = $previous->getRequest();
-            $this->response = $previous->getResponse();
+            $this->setRequest($previous->getRequest());
+
+            if (($response = $previous->getResponse()) !== null) {
+                $this->setResponse($response);
+            }
         }
     }
 
@@ -48,7 +53,7 @@ class ApiException extends \RuntimeException
      */
     public function setRequest(RequestInterface $request)
     {
-        $this->request = $request;
+        $this->request = Request::fromRequest($request);
         return $this;
     }
 
@@ -66,7 +71,7 @@ class ApiException extends \RuntimeException
      */
     public function setResponse(ResponseInterface $response)
     {
-        $this->response = $response;
+        $this->response = Response::fromResponse($response);
         return $this;
     }
 }
