@@ -12,7 +12,7 @@ Hyper is an HTTP Client that aims to provide a simple, but powerful interface fo
 * Extremely simple interface `Hyper::get('http://some/url')`.
 * Also supports object style `Hyper::make(...)->get('http://some/url')`.
 * Provides a `Response` object which provides useful information like HTTP status code, body and headers.
-* Every `Response` mixes in [rexlabs\array-object](https://github.com/rexlabsio/array-object) which allows you to
+* Every `Response` mixes in [rexlabs\array-object](https://packagist.org/packages/rexlabs/array-object) which allows you to
 easily interrogate API responses.
 * Throws a limited set of exceptions (with access to the request and/or response) when things go wrong.
 * You have access to the original `Request` via `$response->getRequest()`.
@@ -69,7 +69,7 @@ echo (string)$response; // Output the response body
 
 ### Example: Working with a JSON API
 
-Since responses mixin [ArrayObject](https://github.com/rexlabsio/array-object) you can
+Since responses mixin [ArrayObject](https://packagist.org/packages/rexlabs/array-object) you can
 easily fetch and manipulate values from the response:
 
 ```php
