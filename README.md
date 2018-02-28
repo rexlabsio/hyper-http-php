@@ -1,5 +1,8 @@
 # Hyper Http Client
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.org/rexlabsio/hyper-http-php.svg?branch=master)](https://travis-ci.org/rexlabsio/hyper-http-php)
+
 ## Overview
 
 Hyper is an HTTP Client that aims to provide a simple, but powerful interface for making HTTP calls and fetching and manipulating API data.
@@ -362,7 +365,15 @@ $obj = $response->toObject();   // Instance of Arraybject
 ## Tests
 
 To run tests:
-`vendor/bin/phpunit`
+```bash
+composer tests
+```
+
+To run coverage report:
+```bash
+composer coverage
+```
+Coverage report is output to `./tests/report/index.html`
 
 ## Contributing
 
