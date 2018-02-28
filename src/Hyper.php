@@ -19,12 +19,18 @@ use Rexlabs\HyperHttp\Message\Response;
 /**
  * Hyper HTTP Client
  *
- * @method static Response call(string $method, string | UriInterface $uri, mixed $body = null, array $headers = [], array $options = [])
- * @method static Response get(string | UriInterface $uri, array $query = [], mixed|null $body = null, array $headers = [], array $options = [])
- * @method static Response post(string | UriInterface $uri, mixed|null $body = null, array $headers = [], array $options = [])
- * @method static Response put(string | UriInterface $uri, mixed|null $body = null, array $headers = [], array $options = [])
- * @method static Response patch(string | UriInterface $uri, mixed|null $body = null, array $headers = [], array $options = [])
- * @method static Response delete(string | UriInterface $uri, mixed|null $body = null, array $headers = [], array $options = [])
+ * @method static Response call(string $method, string | UriInterface $uri, mixed $body = null, array $headers = [],
+ *         array $options = [])
+ * @method static Response get(string | UriInterface $uri, array $query = [], mixed | null $body = null, array $headers
+ *         = [], array $options = [])
+ * @method static Response post(string | UriInterface $uri, mixed | null $body = null, array $headers = [], array
+ *         $options = [])
+ * @method static Response put(string | UriInterface $uri, mixed | null $body = null, array $headers = [], array
+ *         $options = [])
+ * @method static Response patch(string | UriInterface $uri, mixed | null $body = null, array $headers = [], array
+ *         $options = [])
+ * @method static Response delete(string | UriInterface $uri, mixed | null $body = null, array $headers = [], array
+ *         $options = [])
  *
  * @author        Jodie Dunlop <jodie.dunlop@rexsoftware.com.au>
  * @copyright (c) 2018 Rex Software Pty Ltd.
@@ -52,11 +58,8 @@ class Hyper implements LoggerAwareInterface
     /** @var array */
     protected $headers = [];
 
-    /** @var callable */
-    protected $rawResponseDataCallback;
-
-    /** @var callable */
-    protected $responseDataCallback;
+    /** @var bool */
+    protected $applyJsonHeaders;
 
     public function __construct(GuzzleClient $guzzle, LoggerInterface $logger, array $config = [])
     {
@@ -98,20 +101,7 @@ class Hyper implements LoggerAwareInterface
         return new static($guzzle ?? new GuzzleClient($guzzleConfig), $logger ?? new NullLogger, $config);
     }
 
-    /**
-     * Route static calls to an instance of the class.
-     * Makes it possible to call class::get() etc. without making an instance first.
-     * @param $name
-     * @param $arguments
-     * @return mixed
-     * @throws \InvalidArgumentException
-     */
-    public static function __callStatic($name, $arguments)
-    {
-        $client = static::make();
 
-        return \call_user_func_array([$client, $name], $arguments);
-    }
 
     /**
      * Make a GET request and return a Response object.
@@ -121,6 +111,8 @@ class Hyper implements LoggerAwareInterface
      * @param array               $headers
      * @param array               $options
      * @return Response
+     * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
+     * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
      */
     public function httpGet($uri, array $query = [], $body = null, array $headers = [], array $options = []): Response
     {
@@ -149,6 +141,8 @@ class Hyper implements LoggerAwareInterface
      * @param array               $headers
      * @param array               $options
      * @return Response
+     * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
+     * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
      */
     public function httpPostForm($uri, array $params = [], array $headers = [], array $options = []): Response
     {
@@ -165,9 +159,15 @@ class Hyper implements LoggerAwareInterface
      * @param array               $headers
      * @param array               $options
      * @return Response
+     * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
+     * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
      */
-    public function httpPostMultipartForm($uri, array $formParams = [], array $headers = [], array $options = []): Response
-    {
+    public function httpPostMultipartForm(
+        $uri,
+        array $formParams = [],
+        array $headers = [],
+        array $options = []
+    ): Response {
         $headers['Content-Type'] = 'multipart/form-data';
         $options['multipart'] = $formParams;
 
@@ -181,6 +181,8 @@ class Hyper implements LoggerAwareInterface
      * @param array               $headers
      * @param array               $options
      * @return Response
+     * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
+     * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
      */
     public function httpPut($uri, $body, array $headers = [], array $options = []): Response
     {
@@ -194,6 +196,8 @@ class Hyper implements LoggerAwareInterface
      * @param array               $headers
      * @param array               $options
      * @return Response
+     * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
+     * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
      */
     public function httpPatch($uri, $body, array $headers = [], array $options = []): Response
     {
@@ -207,12 +211,12 @@ class Hyper implements LoggerAwareInterface
      * @param array               $headers
      * @param array               $options
      * @return Response
+     * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
+     * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
      */
     public function httpDelete($uri, $body = null, array $headers = [], array $options = []): Response
     {
-        $options['body'] = is_array($body) ? json_encode($body) : $body;
-
-        return $this->httpCall('DELETE', $this->makeUri($uri), $headers, $body ?? null, $options);
+        return $this->httpCall('DELETE', $this->makeUri($uri), $body ?? null, $headers, $options);
 
     }
 
@@ -263,13 +267,20 @@ class Hyper implements LoggerAwareInterface
     ): Request {
         $headers = $this->mergeHeaders($headers ?? []);
 
-        // TODO: if ($this->wantsJson) { ...
-        // Supplement headers for JSON
-        if (!isset($headers['Content-Type'])) {
-            $headers['Content-Type'] = 'application/json';
+        if (\is_array($body)) {
+            $body = \GuzzleHttp\json_encode($body);
+            if (!isset($headers['Content-Type'])) {
+                $headers['Content-Type'] = 'application/json';
+            }
         }
-        if (!isset($headers['Accept'])) {
-            $headers['Accept'] = 'application/json';
+
+        if ($this->applyJsonHeaders) {
+            if (!isset($headers['Content-Type'])) {
+                $headers['Content-Type'] = 'application/json';
+            }
+            if (!isset($headers['Accept-Type'])) {
+                $headers['Accept-Type'] = 'application/json';
+            }
         }
 
         $request = new \GuzzleHttp\Psr7\Request($this->sanitizeMethod($method), $this->makeUri($uri), $headers,
@@ -474,6 +485,18 @@ class Hyper implements LoggerAwareInterface
         $this->getLogger()->log($level, $message, $context);
     }
 
+    public function usingJson(bool $enabled = true)
+    {
+        $instance = $this;
+
+        if ($this->applyJsonHeaders !== $enabled) {
+            $instance = clone $this;
+            $instance->applyJsonHeaders = $enabled;
+        }
+
+        return $instance;
+    }
+
     /**
      * Routes missing object methods to http{MethodName}.
      * This allows get(), put(), patch() etc. to be aliased to httpGet() httpPut() httpPatch() ...
@@ -485,13 +508,36 @@ class Hyper implements LoggerAwareInterface
      */
     public function __call($name, $arguments)
     {
+        $instance = $this;
+
+        // When the method call is suffixed with Json we will force json
+        // headers by
+        if (preg_match('/json$/i', $name)) {
+            $name = preg_replace('/json$/i', '', $name);
+            $instance = $this->usingJson();  // Get a cloned object
+        }
         $httpMethod = 'http' . ucfirst($name);
-        if (method_exists($this, $httpMethod)) {
+        if (method_exists($instance, $httpMethod)) {
             // Call http method
-            return $this->$httpMethod(...$arguments);
+            return $instance->$httpMethod(...$arguments);
         }
 
-        return $this->httpCall($this->sanitizeMethod($name), ...$arguments);
+        return $instance->httpCall($instance->sanitizeMethod($name), ...$arguments);
+    }
+
+    /**
+     * Route static calls to an instance of the class.
+     * Makes it possible to call class::get() etc. without making an instance first.
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws \InvalidArgumentException
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        $client = static::make();
+
+        return \call_user_func_array([$client, $name], $arguments);
     }
 
     /**
