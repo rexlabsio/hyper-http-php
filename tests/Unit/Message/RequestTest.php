@@ -1,4 +1,5 @@
 <?php
+
 namespace Rexlabs\HyperHttp\Tests\Unit\Message;
 
 use PHPUnit\Framework\TestCase;
@@ -30,10 +31,10 @@ class RequestTest extends TestCase
 
         $request = new Request('POST', '/api/v1/people',
             [
-                'Authorization' => 'Bearer FAKE'
+                'Authorization' => 'Bearer FAKE',
             ],
             \GuzzleHttp\json_encode([
-                'name' => 'Bob',
+                'name'  => 'Bob',
                 'email' => 'bob@example.com',
             ])
         );
@@ -47,12 +48,12 @@ class RequestTest extends TestCase
     public function test_is_form()
     {
         $request = (new Request('POST', '/api/v1/people', [
-            'Content-Type' => 'application/x-www-form-urlencoded'
+            'Content-Type' => 'application/x-www-form-urlencoded',
         ]))->setOptions([
             'form_data' => [
                 'name' => 'Walter',
-                'age' => 21,
-            ]
+                'age'  => 21,
+            ],
         ]);
         $this->assertTrue($request->isForm());
         $this->assertTrue($request->isUrlEncodedForm());
@@ -61,12 +62,12 @@ class RequestTest extends TestCase
     public function test_can_get_data_from_form()
     {
         $request = (new Request('POST', '/api/v1/people', [
-            'Content-Type' => 'application/x-www-form-urlencoded'
+            'Content-Type' => 'application/x-www-form-urlencoded',
         ]))->setOptions([
             'form_data' => [
                 'name' => 'Walter',
-                'age' => 21,
-            ]
+                'age'  => 21,
+            ],
         ]);
         $this->assertTrue($request->isForm());
         $this->assertTrue($request->isUrlEncodedForm());
@@ -75,18 +76,18 @@ class RequestTest extends TestCase
     public function test_is_multipart_form()
     {
         $request = (new Request('POST', '/api/v1/people', [
-            'Content-Type' => 'multipart/form-data'
+            'Content-Type' => 'multipart/form-data',
         ]))->setOptions([
             'multipart' => [
                 [
                     'field_name' => 'name',
-                    'contents' => 'Walter',
+                    'contents'   => 'Walter',
                 ],
                 [
                     'field_name' => 'age',
-                    'contents' => 21,
+                    'contents'   => 21,
                 ],
-            ]
+            ],
         ]);
         $this->assertTrue($request->isForm());
         $this->assertTrue($request->isMultipartForm());
@@ -95,27 +96,27 @@ class RequestTest extends TestCase
     public function test_can_get_data_from_multipart_form()
     {
         $request = (new Request('POST', '/api/v1/people', [
-            'Content-Type' => 'multipart/form-data'
+            'Content-Type' => 'multipart/form-data',
         ]))->setOptions([
             'multipart' => [
                 [
                     'field_name' => 'name',
-                    'contents' => 'Walter',
+                    'contents'   => 'Walter',
                 ],
                 [
                     'field_name' => 'age',
-                    'contents' => 21,
+                    'contents'   => 21,
                 ],
-            ]
+            ],
         ]);
         $this->assertEquals([
             [
                 'field_name' => 'name',
-                'contents' => 'Walter',
+                'contents'   => 'Walter',
             ],
             [
                 'field_name' => 'age',
-                'contents' => 21,
+                'contents'   => 21,
             ],
         ], $request->getFormData());
     }

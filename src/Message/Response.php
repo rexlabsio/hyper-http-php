@@ -1,4 +1,5 @@
 <?php
+
 namespace Rexlabs\HyperHttp\Message;
 
 use Psr\Http\Message\RequestInterface;
@@ -6,9 +7,9 @@ use Psr\Http\Message\ResponseInterface;
 use Rexlabs\ArrayObject\ArrayObject;
 
 /**
- * Class Response
+ * Class Response.
+ *
  * @mixin \Rexlabs\ArrayObject\ArrayObject
- * @package Rexlabs\HyperHttp\Message
  */
 class Response extends \GuzzleHttp\Psr7\Response
 {
@@ -23,7 +24,9 @@ class Response extends \GuzzleHttp\Psr7\Response
     /**
      * Upgrades an existing Response which implements the Guzzle response interface
      * into a Hyper Response object.
+     *
      * @param ResponseInterface $response
+     *
      * @return static
      */
     public static function fromResponse(ResponseInterface $response)
@@ -39,6 +42,7 @@ class Response extends \GuzzleHttp\Psr7\Response
 
     /**
      * Gets the request associated with this response.
+     *
      * @return null|RequestInterface|Request
      */
     public function getRequest()
@@ -48,7 +52,9 @@ class Response extends \GuzzleHttp\Psr7\Response
 
     /**
      * Sets the request associated with this response.
+     *
      * @param RequestInterface $request
+     *
      * @return $this
      */
     public function setRequest(RequestInterface $request)
@@ -61,6 +67,7 @@ class Response extends \GuzzleHttp\Psr7\Response
     /**
      * Converts the Response body to an array.
      * If the body cannot be converted to an array, an empty array [] will be returned.
+     *
      * @return array
      */
     public function toArray(): array
@@ -84,6 +91,7 @@ class Response extends \GuzzleHttp\Psr7\Response
      * Converts the array content of the response to an ArrayObject instance.
      * If the response body is not convertible to an array, then an empty ArrayObject is returned.
      * Note: the object is cached after the first call to this method.
+     *
      * @return ArrayObject
      */
     public function toObject(): ArrayObject
@@ -96,9 +104,11 @@ class Response extends \GuzzleHttp\Psr7\Response
     }
 
     /**
-     * Returns a Json (string) representation of the internal ArrayObject
-     * @return string
+     * Returns a Json (string) representation of the internal ArrayObject.
+     *
      * @throws \Rexlabs\ArrayObject\Exceptions\JsonEncodeException
+     *
+     * @return string
      */
     public function toJson(): string
     {
@@ -107,8 +117,10 @@ class Response extends \GuzzleHttp\Psr7\Response
 
     /**
      * Delegates missing methods to the inner ArrayObject.
+     *
      * @param $name
      * @param $arguments
+     *
      * @return mixed
      */
     public function __call($name, $arguments)
@@ -118,7 +130,9 @@ class Response extends \GuzzleHttp\Psr7\Response
 
     /**
      * Delegates property getter to the underlying ArrayObject.
+     *
      * @param $name
+     *
      * @return mixed
      */
     public function __get($name)
@@ -128,8 +142,10 @@ class Response extends \GuzzleHttp\Psr7\Response
 
     /**
      * Delegates property setter to the underlying ArrayObject.
+     *
      * @param $name
      * @param $value
+     *
      * @return $this
      */
     public function __set($name, $value)
@@ -139,7 +155,9 @@ class Response extends \GuzzleHttp\Psr7\Response
 
     /**
      * Delegates property existence to the underlying ArrayObject.
+     *
      * @param $name
+     *
      * @return bool
      */
     public function __isset($name)
@@ -149,10 +167,11 @@ class Response extends \GuzzleHttp\Psr7\Response
 
     /**
      * Returns a string version of the response body.
+     *
      * @return string
      */
     public function __toString()
     {
-        return (string)$this->getBody();
+        return (string) $this->getBody();
     }
 }

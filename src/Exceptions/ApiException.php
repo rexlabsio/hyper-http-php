@@ -1,4 +1,5 @@
 <?php
+
 namespace Rexlabs\HyperHttp\Exceptions;
 
 use GuzzleHttp\Exception\RequestException;
@@ -20,10 +21,10 @@ class ApiException extends \RuntimeException
     protected $response;
 
     /**
-     * RequestException constructor
+     * RequestException constructor.
      *
-     * @param string $message
-     * @param int $code
+     * @param string          $message
+     * @param int             $code
      * @param \Throwable|null $previous
      */
     public function __construct($message, $code = 0, \Throwable $previous = null)
@@ -49,11 +50,13 @@ class ApiException extends \RuntimeException
 
     /**
      * @param RequestInterface $request
+     *
      * @return $this
      */
     public function setRequest(RequestInterface $request)
     {
         $this->request = Request::fromRequest($request);
+
         return $this;
     }
 
@@ -67,11 +70,13 @@ class ApiException extends \RuntimeException
 
     /**
      * @param ResponseInterface $response
+     *
      * @return $this
      */
     public function setResponse(ResponseInterface $response)
     {
         $this->response = Response::fromResponse($response);
+
         return $this;
     }
 }

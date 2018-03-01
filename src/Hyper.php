@@ -1,4 +1,5 @@
 <?php
+
 namespace Rexlabs\HyperHttp;
 
 use Concat\Http\Middleware\Logger;
@@ -17,7 +18,7 @@ use Rexlabs\HyperHttp\Message\Request;
 use Rexlabs\HyperHttp\Message\Response;
 
 /**
- * Hyper HTTP Client
+ * Hyper HTTP Client.
  *
  * @method static Response call(string $method, string | UriInterface $uri, mixed $body = null, array $headers = [],
  *         array $options = [])
@@ -35,9 +36,6 @@ use Rexlabs\HyperHttp\Message\Response;
  * @author        Jodie Dunlop <jodie.dunlop@rexsoftware.com.au>
  * @copyright (c) 2018 Rex Software Pty Ltd.
  * @license       MIT
- * @package       Rexlabs\HyperHttp
- *
- *
  */
 class Hyper implements LoggerAwareInterface
 {
@@ -71,11 +69,14 @@ class Hyper implements LoggerAwareInterface
     /**
      * Makes a new instance of the class, with appropriate defaults.
      * You can optionally pass in configuration options, a Guzzle client instance and/or a logger.
+     *
      * @param array                $config
      * @param GuzzleClient|null    $guzzle
      * @param LoggerInterface|null $logger
-     * @return static
+     *
      * @throws BadConfigurationException
+     *
+     * @return static
      */
     public static function make(array $config = [], GuzzleClient $guzzle = null, LoggerInterface $logger = null)
     {
@@ -98,16 +99,19 @@ class Hyper implements LoggerAwareInterface
             $guzzleConfig['handler']->push($loggerMiddleware);
         }
 
-        return new static($guzzle ?? new GuzzleClient($guzzleConfig), $logger ?? new NullLogger, $config);
+        return new static($guzzle ?? new GuzzleClient($guzzleConfig), $logger ?? new NullLogger(), $config);
     }
 
     /**
      * Route static calls to an instance of the class.
      * Makes it possible to call class::get() etc. without making an instance first.
+     *
      * @param $name
      * @param $arguments
-     * @return mixed
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return mixed
      */
     public static function __callStatic($name, $arguments)
     {
@@ -118,14 +122,17 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Make a GET request and return a Response object.
+     *
      * @param string|UriInterface $uri
-     * @param array               $query GET query options
+     * @param array               $query   GET query options
      * @param mixed|null          $body
      * @param array               $headers
      * @param array               $options
-     * @return Response
+     *
      * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
      * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
+     *
+     * @return Response
      */
     public function httpGet($uri, array $query = [], $body = null, array $headers = [], array $options = []): Response
     {
@@ -135,13 +142,16 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Make a POST request and return a Response object.
+     *
      * @param string|UriInterface $uri
      * @param mixed               $body
      * @param array               $headers
      * @param array               $options
-     * @return Response
+     *
      * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
      * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
+     *
+     * @return Response
      */
     public function httpPost($uri, $body, array $headers = [], array $options = []): Response
     {
@@ -151,13 +161,16 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Make a POST request with Form parameters and return a Response object.
+     *
      * @param string|UriInterface $uri
      * @param array               $params
      * @param array               $headers
      * @param array               $options
-     * @return Response
+     *
      * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
      * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
+     *
+     * @return Response
      */
     public function httpPostForm($uri, array $params = [], array $headers = [], array $options = []): Response
     {
@@ -169,13 +182,16 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Make a multipart POST request with Form parameters and return a Response object.
+     *
      * @param string|UriInterface $uri
      * @param array               $formParams
      * @param array               $headers
      * @param array               $options
-     * @return Response
+     *
      * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
      * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
+     *
+     * @return Response
      */
     public function httpPostMultipartForm(
         $uri,
@@ -191,13 +207,16 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Make a PUT request and return a Response object.
+     *
      * @param string|UriInterface $uri
      * @param mixed               $body
      * @param array               $headers
      * @param array               $options
-     * @return Response
+     *
      * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
      * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
+     *
+     * @return Response
      */
     public function httpPut($uri, $body, array $headers = [], array $options = []): Response
     {
@@ -206,13 +225,16 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Make a PATCH request and return a Response object.
+     *
      * @param string|UriInterface $uri
      * @param mixed               $body
      * @param array               $headers
      * @param array               $options
-     * @return Response
+     *
      * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
      * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
+     *
+     * @return Response
      */
     public function httpPatch($uri, $body, array $headers = [], array $options = []): Response
     {
@@ -221,30 +243,35 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Make a DELETE request and return a Response object.
+     *
      * @param string|UriInterface $uri
      * @param mixed|null          $body
      * @param array               $headers
      * @param array               $options
-     * @return Response
+     *
      * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
      * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
+     *
+     * @return Response
      */
     public function httpDelete($uri, $body = null, array $headers = [], array $options = []): Response
     {
         return $this->httpCall('DELETE', $this->makeUri($uri), $body ?? null, $headers, $options);
-
     }
 
     /**
      * Make a request (with given method) and return a Response object.
+     *
      * @param string              $method
      * @param string|UriInterface $uri
      * @param mixed|null          $body
      * @param array               $headers
      * @param array               $options
-     * @return Response
+     *
      * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
      * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
+     *
+     * @return Response
      */
     public function httpCall($method, $uri, $body = null, array $headers = [], array $options = []): Response
     {
@@ -265,13 +292,15 @@ class Hyper implements LoggerAwareInterface
     }
 
     /**
-     * Create a new request object
+     * Create a new request object.
+     *
      * @param string $method
      * @param        $uri
      * @param array  $headers
      * @param null   $body
      * @param null   $version
      * @param array  $options
+     *
      * @return Request
      */
     public function createRequest(
@@ -309,8 +338,10 @@ class Hyper implements LoggerAwareInterface
     }
 
     /**
-     * Send a Request object and get a Response
+     * Send a Request object and get a Response.
+     *
      * @param Request $request
+     *
      * @return Response
      */
     public function httpSend(Request $request): Response
@@ -325,8 +356,10 @@ class Hyper implements LoggerAwareInterface
     }
 
     /**
-     * Prepends the base URI to any non-absolute URI
+     * Prepends the base URI to any non-absolute URI.
+     *
      * @param string $uri
+     *
      * @return string
      */
     public function url($uri)
@@ -336,7 +369,7 @@ class Hyper implements LoggerAwareInterface
         if (!preg_match('#^https?://#', $uri)) {
             $url = strpos($uri, '/') !== 0 ? "/$uri" : $uri;
             if ($this->baseUri) {
-                $url = preg_replace('#/$#', '', $this->baseUri) . $url;
+                $url = preg_replace('#/$#', '', $this->baseUri).$url;
             }
         }
 
@@ -344,7 +377,8 @@ class Hyper implements LoggerAwareInterface
     }
 
     /**
-     * Returns the Logger instance
+     * Returns the Logger instance.
+     *
      * @return LoggerInterface
      */
     public function getLogger(): LoggerInterface
@@ -354,7 +388,9 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Set the Logger instance which will be used to log requests and responses.
+     *
      * @param LoggerInterface $logger
+     *
      * @return $this
      */
     public function setLogger(LoggerInterface $logger)
@@ -366,6 +402,7 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Gets the underlying Guzzle client used to transport the requests.
+     *
      * @return GuzzleClient
      */
     public function getGuzzleClient(): GuzzleClient
@@ -375,6 +412,7 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * @param GuzzleClient $guzzle
+     *
      * @return $this
      */
     public function setGuzzleClient(GuzzleClient $guzzle)
@@ -394,6 +432,7 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * @param array $config
+     *
      * @return $this
      */
     public function setConfig(array $config)
@@ -424,7 +463,9 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Convenience method for configuring the base URI.
+     *
      * @param string $uri
+     *
      * @return $this
      */
     public function setBaseUri($uri)
@@ -435,9 +476,11 @@ class Hyper implements LoggerAwareInterface
     }
 
     /**
-     * Get a header by key
+     * Get a header by key.
+     *
      * @param string      $key
      * @param string|null $default
+     *
      * @return string|null
      */
     public function getHeader($key, $default = null)
@@ -446,21 +489,25 @@ class Hyper implements LoggerAwareInterface
     }
 
     /**
-     * Set/replace a header by key
+     * Set/replace a header by key.
+     *
      * @param string $key
      * @param mixed  $value
+     *
      * @return $this
      */
     public function setHeader($key, $value)
     {
-        $this->headers[$key] = (string)$value;
+        $this->headers[$key] = (string) $value;
 
         return $this;
     }
 
     /**
-     * Replace the headers with the supplied array (key => value)
+     * Replace the headers with the supplied array (key => value).
+     *
      * @param array $headers
+     *
      * @return $this
      */
     public function setHeaders(array $headers)
@@ -471,8 +518,10 @@ class Hyper implements LoggerAwareInterface
     }
 
     /**
-     * Create a new instance of the client with additional headers set
+     * Create a new instance of the client with additional headers set.
+     *
      * @param array $headers
+     *
      * @return $this
      */
     public function withHeaders(array $headers)
@@ -482,7 +531,9 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Merge a new set of headers with any existing headers.  (Existing keys are overwritten).
+     *
      * @param array $headers
+     *
      * @return $this
      */
     public function addHeaders(array $headers)
@@ -493,7 +544,8 @@ class Hyper implements LoggerAwareInterface
     }
 
     /**
-     * Log a message via the logger
+     * Log a message via the logger.
+     *
      * @param       $level
      * @param       $message
      * @param array $context
@@ -518,11 +570,14 @@ class Hyper implements LoggerAwareInterface
     /**
      * Routes missing object methods to http{MethodName}.
      * This allows get(), put(), patch() etc. to be aliased to httpGet() httpPut() httpPatch() ...
+     *
      * @param $name
      * @param $arguments
-     * @return Response
+     *
      * @throws \Rexlabs\HyperHttp\Exceptions\ResponseException
      * @throws \Rexlabs\HyperHttp\Exceptions\RequestException
+     *
+     * @return Response
      */
     public function __call($name, $arguments)
     {
@@ -534,7 +589,7 @@ class Hyper implements LoggerAwareInterface
             $name = preg_replace('/json$/i', '', $name);
             $instance = $this->usingJson();  // Get a cloned object
         }
-        $httpMethod = 'http' . ucfirst($name);
+        $httpMethod = 'http'.ucfirst($name);
         if (method_exists($instance, $httpMethod)) {
             // Call http method
             return $instance->$httpMethod(...$arguments);
@@ -545,7 +600,9 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * Merges the given headers with the global headers stored in the instance.
+     *
      * @param array $headers
+     *
      * @return array
      */
     protected function mergeHeaders(array $headers): array
@@ -554,8 +611,10 @@ class Hyper implements LoggerAwareInterface
     }
 
     /**
-     * Sanitizes an HTTP method
+     * Sanitizes an HTTP method.
+     *
      * @param $method
+     *
      * @return string
      */
     protected function sanitizeMethod(string $method): string
@@ -565,6 +624,7 @@ class Hyper implements LoggerAwareInterface
 
     /**
      * @param string|UriInterface $uri
+     *
      * @return Uri|UriInterface
      */
     protected function makeUri($uri): Uri

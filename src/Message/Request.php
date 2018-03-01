@@ -1,4 +1,5 @@
 <?php
+
 namespace Rexlabs\HyperHttp\Message;
 
 use Namshi\Cuzzle\Formatter\CurlFormatter;
@@ -13,7 +14,9 @@ class Request extends \GuzzleHttp\Psr7\Request
 
     /**
      * Upgrade the given request to a native one.
+     *
      * @param RequestInterface $request
+     *
      * @return RequestInterface|Request|static
      */
     public static function fromRequest(RequestInterface $request)
@@ -24,6 +27,7 @@ class Request extends \GuzzleHttp\Psr7\Request
 
     /**
      * Get curl command output for this request.
+     *
      * @return string
      */
     public function getCurl()
@@ -33,7 +37,9 @@ class Request extends \GuzzleHttp\Psr7\Request
 
     /**
      * Save the request options with the request.
+     *
      * @param array $options
+     *
      * @return $this
      */
     public function setOptions(array $options)
@@ -45,6 +51,7 @@ class Request extends \GuzzleHttp\Psr7\Request
 
     /**
      * Retrieve the saved request options.
+     *
      * @return array
      */
     public function getOptions()
@@ -57,6 +64,6 @@ class Request extends \GuzzleHttp\Psr7\Request
      */
     public function __toString()
     {
-        return (string)$this->getBody();
+        return (string) $this->getBody();
     }
 }
