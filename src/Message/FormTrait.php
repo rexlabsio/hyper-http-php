@@ -1,15 +1,15 @@
 <?php
-namespace Rexlabs\HyperHttp\Message;
 
+namespace Rexlabs\HyperHttp\Message;
 
 trait FormTrait
 {
-
-
     /**
      * Get the form data for this form.
-     * @return array
+     *
      * @throws \RuntimeException
+     *
+     * @return array
      */
     public function getFormData()
     {
@@ -21,11 +21,12 @@ trait FormTrait
             return $this->getOptions()['multipart'] ?? [];
         }
 
-        throw new \RuntimeException('Cannot get form data from ' . $this->contentType());
+        throw new \RuntimeException('Cannot get form data from '.$this->contentType());
     }
 
     /**
      * Determines if this request is a form based on the request headers.
+     *
      * @return bool
      */
     public function isForm()
@@ -42,6 +43,7 @@ trait FormTrait
 
     /**
      * Determine if this request is a urlencoded form.
+     *
      * @return bool
      */
     public function isUrlEncodedForm()
@@ -50,7 +52,8 @@ trait FormTrait
     }
 
     /**
-     * Determine if this request is a multipart form
+     * Determine if this request is a multipart form.
+     *
      * @return bool
      */
     public function isMultipartForm()

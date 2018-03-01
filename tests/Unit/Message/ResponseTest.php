@@ -1,4 +1,5 @@
 <?php
+
 namespace Rexlabs\HyperHttp\Tests\Unit\Message;
 
 use PHPUnit\Framework\TestCase;
@@ -70,13 +71,13 @@ class ResponseTest extends TestCase
         $response = new Response(200, [
             'Content-Type' => 'application/json',
         ], \GuzzleHttp\json_encode([
-            'id' => 1,
+            'id'   => 1,
             'name' => 'Book 1',
         ]));
         $this->assertTrue($response->has('name'));
         $response->name = 'Pride and Prejudice';
         $this->assertEquals([
-            'id' => 1,
+            'id'   => 1,
             'name' => 'Pride and Prejudice',
         ], $response->toArray());
     }
@@ -86,7 +87,7 @@ class ResponseTest extends TestCase
         $response = new Response(200, [
             'Content-Type' => 'application/json',
         ], \GuzzleHttp\json_encode([
-            'id' => 1,
+            'id'   => 1,
             'name' => 'Book 1',
         ]));
         $this->assertTrue(isset($response->id));
@@ -98,7 +99,7 @@ class ResponseTest extends TestCase
         $response = new Response(200, [
             'Content-Type' => 'application/json',
         ], \GuzzleHttp\json_encode([
-            'id' => 1,
+            'id'   => 1,
             'name' => 'Book 1',
         ]));
         $obj = $response->toObject();
@@ -106,18 +107,17 @@ class ResponseTest extends TestCase
         $this->assertEquals('Book 1', $obj->get('name'));
     }
 
-
     // toJson() // add
     public function test_to_json()
     {
         $response = new Response(200, [
             'Content-Type' => 'application/json',
         ], \GuzzleHttp\json_encode([
-            'id' => 1,
+            'id'   => 1,
             'name' => 'Book 1',
         ]));
         $this->assertEquals(\GuzzleHttp\json_encode([
-            'id' => 1,
+            'id'   => 1,
             'name' => 'Book 1',
         ]), $response->toJson());
     }
@@ -130,13 +130,12 @@ class ResponseTest extends TestCase
         $this->assertEquals('Hello world!', $response);
 
         $encodedJson = \GuzzleHttp\json_encode([
-            'id' => 1,
+            'id'   => 1,
             'name' => 'Book 1',
         ]);
         $response = new Response(200, [
             'Content-Type' => 'application/json',
         ], $encodedJson);
-        $this->assertEquals($encodedJson, (string)$response);
+        $this->assertEquals($encodedJson, (string) $response);
     }
-
 }

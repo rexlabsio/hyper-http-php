@@ -1,13 +1,12 @@
 <?php
 
-
 namespace Rexlabs\HyperHttp\Message;
-
 
 trait ContentTypeTrait
 {
     /**
      * Returns the content type of the response.
+     *
      * @return string
      */
     public function contentType()
@@ -17,6 +16,7 @@ trait ContentTypeTrait
 
     /**
      * Determines if the response is a JSON response by interrogating the headers.
+     *
      * @return bool
      */
     public function isJson(): bool

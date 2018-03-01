@@ -1,4 +1,5 @@
 <?php
+
 namespace Rexlabs\HyperHttp\Tests\Unit;
 
 use GuzzleHttp\Client as GuzzleClient;
@@ -27,12 +28,10 @@ class HyperTest extends TestCase
         $this->assertInstanceOf(LoggerInterface::class, $hyper->getLogger());
     }
 
-
     public function test_instantiation_via_make_with_guzzle_config()
     {
         $hyper = Hyper::make(['guzzle' => ['timeout' => 321]]);
         $this->assertContains(['timeout' => 321], $hyper->getGuzzleClient()->getConfig());
-
     }
 
     public function test_instantiation_via_make_cannot_provide_guzzle_client_and_config()
@@ -51,7 +50,6 @@ class HyperTest extends TestCase
             'timeout' => 321,
             'handler',
         ], $hyper->getGuzzleClient()->getConfig());
-
     }
 
     public function test_url()
@@ -138,13 +136,12 @@ class HyperTest extends TestCase
         $this->assertEquals('MyApplication1234', $hyper->getHeader('X-App-Identity'));
         $this->assertEquals('Another Header', $hyper->getHeader('X-Another-Header'));
         $this->assertEquals('54321', $hyper->setHeader('X-App-Identity', '54321')->getHeader('X-App-Identity'));
-
     }
 
     public function test_set_multiple_headers()
     {
         $hyper = Hyper::make()->setHeaders([
-            'X-App-Identity' => 'MyApplication1234',
+            'X-App-Identity'   => 'MyApplication1234',
             'X-Another-Header' => 'Another Header',
         ]);
         $this->assertEquals('MyApplication1234', $hyper->getHeader('X-App-Identity'));
@@ -155,14 +152,13 @@ class HyperTest extends TestCase
     {
         $hyper = Hyper::make([
             'headers' => [
-                'X-App-Identity' => 'MyApplication1234',
+                'X-App-Identity'   => 'MyApplication1234',
                 'X-Another-Header' => 'Another Header',
             ],
         ]);
         $this->assertEquals('MyApplication1234', $hyper->getHeader('X-App-Identity'));
         $this->assertEquals('Another Header', $hyper->getHeader('X-Another-Header'));
     }
-
 
     public function test_create_post_request()
     {
@@ -172,11 +168,11 @@ class HyperTest extends TestCase
         $this->assertEquals('1.1', $request->getProtocolVersion());
         $this->assertEquals('POST', $request->getMethod());
         $this->assertInstanceOf(UriInterface::class, $request->getUri());
-        $this->assertEquals('/fruit', (string)$request->getUri());
+        $this->assertEquals('/fruit', (string) $request->getUri());
         $this->assertEquals('', $request->getHeaderLine('Content-Type'));
         $this->assertEquals('', $request->getHeaderLine('Accept-Type'));
         $this->assertEquals('No', $request->getHeaderLine('X-Oranges'));
-        $this->assertEquals('apples', (string)$request->getBody());
+        $this->assertEquals('apples', (string) $request->getBody());
     }
 
     public function test_create_post_request_with_array_body_is_converted_to_json()
@@ -185,7 +181,7 @@ class HyperTest extends TestCase
         $hyper = Hyper::make();
         $request = $hyper->createRequest('POST', '/fruit', ['X-Oranges' => 'No'], ['fruit' => 'apples']);
         $this->assertEquals('application/json', $request->getHeaderLine('Content-Type'));
-        $this->assertEquals(\GuzzleHttp\json_encode(['fruit' => 'apples']), (string)$request);
+        $this->assertEquals(\GuzzleHttp\json_encode(['fruit' => 'apples']), (string) $request);
     }
 
     public function test_json_magic_methods_set_json_headers()
@@ -212,7 +208,6 @@ class HyperTest extends TestCase
         $response = $hyper->deleteJson('/some/uri');
         $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Content-Type'));
         $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Accept-Type'));
-
     }
 
     public function test_valid_get_request_returns_response()
@@ -221,7 +216,7 @@ class HyperTest extends TestCase
             'Content-Type' => 'application/json',
         ], [
             'data' => [
-                'id' => 5678,
+                'id'      => 5678,
                 'message' => 'hello',
             ],
         ]);
@@ -230,7 +225,7 @@ class HyperTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals([
             'data' => [
-                'id' => 5678,
+                'id'      => 5678,
                 'message' => 'hello',
             ],
         ], $response->toArray());
@@ -242,15 +237,15 @@ class HyperTest extends TestCase
             'Content-Type' => 'application/json',
         ], [
             'data' => [
-                'id' => 5678,
-                'message' => 'hello',
+                'id'         => 5678,
+                'message'    => 'hello',
                 'recipients' => [
                     [
-                        'id' => 'r1',
+                        'id'      => 'r1',
                         'address' => 'bob@example.com',
                     ],
                     [
-                        'id' => 'r2',
+                        'id'      => 'r2',
                         'address' => 'alice@example.com',
                     ],
                 ],
@@ -287,7 +282,6 @@ class HyperTest extends TestCase
         $hyper = Hyper::make([], $mockedGuzzle);
         $this->expectException(RequestException::class);
         $hyper->httpGet('/message/2');
-
     }
 
     public function test_response_exception_includes_request()
@@ -297,7 +291,7 @@ class HyperTest extends TestCase
         ], [
             'error' => [
                 'message' => 'Example error message',
-            ]
+            ],
         ]);
 
         try {
@@ -306,7 +300,7 @@ class HyperTest extends TestCase
         } catch (ApiException $e) {
             $this->assertNotNull($e->getRequest());
             $this->assertInstanceOf(Request::class, $e->getRequest());
-            $this->assertEquals('/message/1', (string)$e->getRequest()->getUri());
+            $this->assertEquals('/message/1', (string) $e->getRequest()->getUri());
 
             $this->assertNotNull($e->getResponse());
             $this->assertInstanceOf(Response::class, $e->getResponse());
@@ -322,7 +316,7 @@ class HyperTest extends TestCase
             'Content-Type' => 'application/json',
         ], [
             'data' => [
-                'id' => 5678,
+                'id'      => 5678,
                 'message' => 'hello',
             ],
         ]);
@@ -344,12 +338,12 @@ class HyperTest extends TestCase
             'Content-Type' => 'application/json',
         ], [
             'data' => [
-                'id' => 5678,
+                'id'      => 5678,
                 'message' => 'hello',
             ],
         ]);
         $hyper = Hyper::make([], $mockedGuzzle)->withHeaders([
-            'X-Cheese' => 'mozzarella'
+            'X-Cheese' => 'mozzarella',
         ]);
         $this->assertEquals('mozzarella', $hyper->getHeader('X-Cheese'));
     }
@@ -360,14 +354,14 @@ class HyperTest extends TestCase
             'Content-Type' => 'application/json',
         ], [
             'data' => [
-                'id' => 5678,
+                'id'      => 5678,
                 'message' => 'hello',
             ],
         ]);
         $hyper = Hyper::make([], $mockedGuzzle);
 
         $this->assertNotEquals($hyper, Hyper::make([], $mockedGuzzle)->withHeaders([
-            'X-Cheese' => 'mozzarella'
+            'X-Cheese' => 'mozzarella',
         ]));
     }
 
@@ -379,7 +373,7 @@ class HyperTest extends TestCase
         $hyper = Hyper::make([], $mockedGuzzle);
         $response = $hyper->httpPostForm('/some/form', [
             'first_name' => 'Walter',
-            'last_name' => 'Lilly',
+            'last_name'  => 'Lilly',
         ]);
         $request = $response->getRequest();
         $this->assertNotNull($request);
@@ -387,7 +381,7 @@ class HyperTest extends TestCase
 
         $this->assertEquals([
             'first_name' => 'Walter',
-            'last_name' => 'Lilly',
+            'last_name'  => 'Lilly',
         ], $request->getFormData());
     }
 
@@ -405,13 +399,13 @@ class HyperTest extends TestCase
             [
                 'name'     => 'last_name',
                 'contents' => 'Lilly',
-            ]
+            ],
         ]);
         $request = $response->getRequest();
         $this->assertNotNull($request);
         $this->assertTrue($request->isMultipartForm());
 
-        $this->assertEquals( [
+        $this->assertEquals([
             [
                 'name'     => 'first_name',
                 'contents' => 'Walter',
@@ -419,7 +413,7 @@ class HyperTest extends TestCase
             [
                 'name'     => 'last_name',
                 'contents' => 'Lilly',
-            ]
+            ],
         ], $request->getFormData());
     }
 
