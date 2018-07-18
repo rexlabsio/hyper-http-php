@@ -98,11 +98,14 @@ for future requests:
 
 ```php
 <?php
+use Rexlabs\HyperHttp\Hyper;
+use Rexlabs\Logger\CustomLogger;
+
 $hyper = Hyper::make()
     ->setBaseUri('http://example.com/api/v1')
     ->setHeader('X-App-Identity', 'Some App')
     ->setHeader('X-Correlation-Id', '12345')
-    ->setLogger(new \Rexlabs\Logger\Logger);
+    ->setLogger(new CustomLogger);
 ```
 
 * `$hyper = Hyper::make(array $config = [], \GuzzleHttp\Client $guzzle, \Psr\Log\LoggerInterface $logger)`
@@ -115,11 +118,11 @@ pass in a Guzzle instance:
 ```php
 
 <?php
-use Rexlabs\HyperHttp\Hyper;
-use GuzzleHttp\Client;
+use Rexlabs\HyperHttp\Client;
+use GuzzleHttp\Client as GuzzleClient;
 use Psr\Log\NullLogger;
 
-$hyper = new Hyper(new Client(), new NullLogger(), [
+$hyper = new Client(new GuzzleClient(), new NullLogger(), [
    'base_uri' => 'http://example.com/api/v1',
    'headers' => [
        'X-App-Identity' => 'Some App',

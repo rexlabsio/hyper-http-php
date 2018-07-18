@@ -9,6 +9,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Psr\Log\NullLogger;
 use Rexlabs\ArrayObject\ArrayObject;
+use Rexlabs\HyperHttp\Client;
 use Rexlabs\HyperHttp\Exceptions\ApiException;
 use Rexlabs\HyperHttp\Exceptions\BadConfigurationException;
 use Rexlabs\HyperHttp\Exceptions\RequestException;
@@ -22,7 +23,7 @@ class HyperTest extends TestCase
     public function test_instantiation_via_make()
     {
         $hyper = Hyper::make();
-        $this->assertInstanceOf(Hyper::class, $hyper);
+        $this->assertInstanceOf(Client::class, $hyper);
         $this->assertEquals([], $hyper->getConfig());
         $this->assertInstanceOf(GuzzleClient::class, $hyper->getGuzzleClient());
         $this->assertInstanceOf(LoggerInterface::class, $hyper->getLogger());
@@ -94,7 +95,7 @@ class HyperTest extends TestCase
     public function test_constructor_accepts_guzzle_client()
     {
         $mockedGuzzle = new GuzzleClient(['timeout' => 222]);
-        $hyper = new Hyper($mockedGuzzle, new NullLogger());
+        $hyper = new Client($mockedGuzzle, new NullLogger());
         $this->assertSame($mockedGuzzle, $hyper->getGuzzleClient());
         $this->assertEquals(222, $hyper->getGuzzleClient()->getConfig('timeout'));
     }
@@ -102,7 +103,7 @@ class HyperTest extends TestCase
     public function test_constructor_accepts_logger()
     {
         $logger = new NullLogger();
-        $hyper = new Hyper($this->getMockedGuzzle(), $logger);
+        $hyper = new Client($this->getMockedGuzzle(), $logger);
         $this->assertSame($logger, $hyper->getLogger());
     }
 
@@ -221,7 +222,7 @@ class HyperTest extends TestCase
             ],
         ]);
         $hyper = Hyper::make([], $mockedGuzzle);
-        $response = $hyper->httpGet('/message/12345');
+        $response = $hyper->get('/message/12345');
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals([
             'data' => [
@@ -251,8 +252,8 @@ class HyperTest extends TestCase
                 ],
             ],
         ]);
-        $hyper = new Hyper($mockedGuzzle, new NullLogger());
-        $response = $hyper->httpGet('/message/12345');
+        $hyper = new Client($mockedGuzzle, new NullLogger());
+        $response = $hyper->get('/message/12345');
         $this->assertInstanceOf(Response::class, $response);
         $this->assertTrue($response->has('data'));
         $message = $response->data;
@@ -273,7 +274,7 @@ class HyperTest extends TestCase
 
         $hyper = Hyper::make([], $mockedGuzzle);
         $this->expectException(ResponseException::class);
-        $hyper->httpGet('/message/1');
+        $hyper->get('/message/1');
 
         $mockedGuzzle = $this->getMockedGuzzle(500, [
             'Content-Type' => 'application/json',
@@ -281,7 +282,7 @@ class HyperTest extends TestCase
 
         $hyper = Hyper::make([], $mockedGuzzle);
         $this->expectException(RequestException::class);
-        $hyper->httpGet('/message/2');
+        $hyper->get('/message/2');
     }
 
     public function test_response_exception_includes_request()
@@ -296,7 +297,7 @@ class HyperTest extends TestCase
 
         try {
             $hyper = Hyper::make([], $mockedGuzzle);
-            $hyper->httpGet('/message/1');
+            $hyper->get('/message/1');
         } catch (ApiException $e) {
             $this->assertNotNull($e->getRequest());
             $this->assertInstanceOf(Request::class, $e->getRequest());
@@ -326,11 +327,6 @@ class HyperTest extends TestCase
         $this->assertEquals(5678, $response->data->id);
     }
 
-    public function test_can_statically_request_arbitary_http_method_verbs()
-    {
-        $this->expectException(RequestException::class);
-        Hyper::cheese('/cheese');
-    }
 
     public function test_with_headers()
     {
@@ -371,7 +367,7 @@ class HyperTest extends TestCase
             'Content-Type' => 'application/json',
         ]);
         $hyper = Hyper::make([], $mockedGuzzle);
-        $response = $hyper->httpPostForm('/some/form', [
+        $response = $hyper->postForm('/some/form', [
             'first_name' => 'Walter',
             'last_name'  => 'Lilly',
         ]);
@@ -391,7 +387,7 @@ class HyperTest extends TestCase
             'Content-Type' => 'application/json',
         ]);
         $hyper = Hyper::make([], $mockedGuzzle);
-        $response = $hyper->httpPostMultipartForm('/some/form', [
+        $response = $hyper->postMultipartForm('/some/form', [
             [
                 'name'     => 'first_name',
                 'contents' => 'Walter',
