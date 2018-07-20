@@ -171,7 +171,7 @@ class HyperTest extends TestCase
         $this->assertInstanceOf(UriInterface::class, $request->getUri());
         $this->assertEquals('/fruit', (string) $request->getUri());
         $this->assertEquals('', $request->getHeaderLine('Content-Type'));
-        $this->assertEquals('', $request->getHeaderLine('Accept-Type'));
+        $this->assertEquals('', $request->getHeaderLine('Accept'));
         $this->assertEquals('No', $request->getHeaderLine('X-Oranges'));
         $this->assertEquals('apples', (string) $request->getBody());
     }
@@ -192,23 +192,23 @@ class HyperTest extends TestCase
 
         $response = $hyper->getJson('/some/uri');
         $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Content-Type'));
-        $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Accept-Type'));
+        $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Accept'));
 
         $response = $hyper->postJson('/some/uri', ['fruit' => 'apples']);
         $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Content-Type'));
-        $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Accept-Type'));
+        $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Accept'));
 
         $response = $hyper->putJson('/some/uri', ['fruit' => 'apples']);
         $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Content-Type'));
-        $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Accept-Type'));
+        $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Accept'));
 
         $response = $hyper->patchJson('/some/uri', ['fruit' => 'apples']);
         $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Content-Type'));
-        $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Accept-Type'));
+        $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Accept'));
 
         $response = $hyper->deleteJson('/some/uri');
         $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Content-Type'));
-        $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Accept-Type'));
+        $this->assertEquals('application/json', $response->getRequest()->getHeaderLine('Accept'));
     }
 
     public function test_valid_get_request_returns_response()
