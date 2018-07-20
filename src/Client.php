@@ -338,8 +338,8 @@ class Client implements LoggerAwareInterface
             if (!isset($headers['Content-Type'])) {
                 $headers['Content-Type'] = 'application/json';
             }
-            if (!isset($headers['Accept-Type'])) {
-                $headers['Accept-Type'] = 'application/json';
+            if (!isset($headers['Accept'])) {
+                $headers['Accept'] = 'application/json';
             }
         }
 
