@@ -5,6 +5,7 @@ namespace Rexlabs\HyperHttp\Message;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Rexlabs\ArrayObject\ArrayObject;
+use Namshi\Cuzzle\Formatter\CurlFormatter;
 
 /**
  * Class Response.
@@ -62,6 +63,20 @@ class Response extends \GuzzleHttp\Psr7\Response
         $this->request = $request;
 
         return $this;
+    }
+
+    /**
+     * Get curl command output for this response's request.
+     *
+     * @return null|string
+     */
+    public function getCurlRequest()
+    {
+        if ($this->request === null) {
+            return null;
+        }
+
+        return (new CurlFormatter())->format($this->request);
     }
 
     /**

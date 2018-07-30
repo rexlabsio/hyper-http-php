@@ -37,6 +37,12 @@ class ResponseTest extends TestCase
             'Content-Type' => 'application/vnd.collection+json',
         ], \GuzzleHttp\json_encode(['Hello world!']));
         $this->assertTrue($response->isJson());
+
+        // application/json; charset=UTF-8
+        $response = new Response(200, [
+            'Content-Type' => 'application/json; charset=UTF-8',
+        ], \GuzzleHttp\json_encode(['Hello world!']));
+        $this->assertTrue($response->isJson());
     }
 
     // toArray()

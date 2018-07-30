@@ -140,8 +140,7 @@ You can easily generate a cURL request for running from the command-line to repr
 use Rexlabs\HyperHttp\Hyper;
 
 echo Hyper::get('https://example.com/api/v1/resources')
-    ->getRequest()
-    ->getCurl();
+    ->getCurlRequest();
 ```
 
 Output:
@@ -301,6 +300,10 @@ Methods available from the `Rexlabs\HyperHttp\Message\Response` object:
 ### getRequest()
 
 Return the `Rexlabs\HyperHttp\Message\Request` object associated with the `Response`
+
+### getCurlRequest()
+
+Return a cURL request (string) suitable for running from the command-line. Useful for debugging requests.
 
 ### getStatusCode()
 

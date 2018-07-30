@@ -11,7 +11,7 @@ trait ContentTypeTrait
      */
     public function contentType()
     {
-        return $this->getHeaderLine('Content-Type');
+        return preg_split('/\s*;\s*/', $this->getHeaderLine('Content-Type'), 2)[0];
     }
 
     /**
@@ -22,13 +22,9 @@ trait ContentTypeTrait
     public function isJson(): bool
     {
         $contentType = $this->contentType();
-        if ($contentType === 'application/json') {
+        if (preg_match('#^application/(.+\+)?json$#i', $contentType)) {
             return true;
         }
-        if (preg_match('#^application/.+\+json$#i', $contentType)) {
-            return true;
-        }
-
         return false;
     }
 }
