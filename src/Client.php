@@ -434,6 +434,10 @@ class Client implements LoggerAwareInterface
     {
         $this->guzzle = $guzzle;
 
+        if ($baseUri = $guzzle->getConfig('base_uri')) {
+            $this->setBaseUri((string) $baseUri);
+        }
+
         return $this;
     }
 

@@ -413,6 +413,21 @@ class HyperTest extends TestCase
         ], $request->getFormData());
     }
 
+    public function test_base_uri_from_guzzle()
+    {
+        $guzzle = new GuzzleClient([
+            'base_uri' => 'http://test.com/v1/'
+        ]);
+
+        $hyper = Hyper::make([], $guzzle);
+        
+        $this->assertSame('http://test.com/v1/', $hyper->getBaseUri());
+
+        $request = $hyper->get('foo/bar')->getRequest();
+
+        $this->assertSame('http://test.com/v1/foo/bar', (string) $request->getUri());
+    }
+
     protected function getMockedGuzzle($statusCode = 200, array $headers = [], $payload = null, $count = 1)
     {
         $queue = [];
