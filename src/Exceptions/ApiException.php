@@ -7,6 +7,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Rexlabs\HyperHttp\Message\Request;
 use Rexlabs\HyperHttp\Message\Response;
+use Namshi\Cuzzle\Formatter\CurlFormatter;
 
 class ApiException extends \RuntimeException
 {
@@ -78,5 +79,17 @@ class ApiException extends \RuntimeException
         $this->response = Response::fromResponse($response);
 
         return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getCurlRequest()
+    {
+        if ($this->request === null) {
+            return null;
+        }
+
+        return (new CurlFormatter())->format($this->request);
     }
 }
