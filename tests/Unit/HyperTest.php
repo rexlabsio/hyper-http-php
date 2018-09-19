@@ -5,13 +5,11 @@ namespace Rexlabs\HyperHttp\Tests\Unit;
 use GuzzleHttp\Client as GuzzleClient;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\UriInterface;
-use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Psr\Log\NullLogger;
 use Rexlabs\ArrayObject\ArrayObject;
 use Rexlabs\HyperHttp\Client;
 use Rexlabs\HyperHttp\Exceptions\ApiException;
-use Rexlabs\HyperHttp\Exceptions\BadConfigurationException;
 use Rexlabs\HyperHttp\Exceptions\RequestException;
 use Rexlabs\HyperHttp\Exceptions\ResponseException;
 use Rexlabs\HyperHttp\Hyper;
@@ -20,39 +18,6 @@ use Rexlabs\HyperHttp\Message\Response;
 
 class HyperTest extends TestCase
 {
-    public function test_instantiation_via_make()
-    {
-        $hyper = Hyper::make();
-        $this->assertInstanceOf(Client::class, $hyper);
-        $this->assertEquals([], $hyper->getConfig());
-        $this->assertInstanceOf(GuzzleClient::class, $hyper->getGuzzleClient());
-        $this->assertInstanceOf(LoggerInterface::class, $hyper->getLogger());
-    }
-
-    public function test_instantiation_via_make_with_guzzle_config()
-    {
-        $hyper = Hyper::make(['guzzle' => ['timeout' => 321]]);
-        $this->assertContains(['timeout' => 321], $hyper->getGuzzleClient()->getConfig());
-    }
-
-    public function test_instantiation_via_make_cannot_provide_guzzle_client_and_config()
-    {
-        $this->expectException(BadConfigurationException::class);
-        Hyper::make(
-            ['guzzle' => ['timeout' => 321]],
-            new GuzzleClient()
-        );
-    }
-
-    public function test_instantiation_with_logger_assigns_logger_middleware()
-    {
-        $hyper = Hyper::make(['guzzle' => ['timeout' => 321]], null, new NullLogger());
-        $this->assertContains([
-            'timeout' => 321,
-            'handler',
-        ], $hyper->getGuzzleClient()->getConfig());
-    }
-
     public function test_url()
     {
         $hyper = Hyper::make();

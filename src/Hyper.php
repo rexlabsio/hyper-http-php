@@ -20,8 +20,12 @@ use Rexlabs\HyperHttp\Message\Response;
  */
 class Hyper
 {
-    /** @var Client */
-    protected static $instance;
+    /**
+     * One instance per subclass
+     *
+     * @var array|Client[]
+     */
+    protected static $instances = [];
 
     /**
      * Makes a new instance of the Client class, with appropriate defaults.
@@ -56,12 +60,28 @@ class Hyper
             $guzzleConfig['handler']->push($loggerMiddleware);
         }
 
-        return new Client($guzzle ?? new GuzzleClient($guzzleConfig), $logger ?? new NullLogger(), $config);
+        return new Client(
+            $guzzle ?? new GuzzleClient(self::makeGuzzleConfig($guzzleConfig)),
+            $logger ?? new NullLogger(),
+            $config
+        );
+    }
+
+    /**
+     * Override to customise default guzzle client
+     *
+     * @param array $config
+     *
+     * @return array
+     */
+    protected static function makeGuzzleConfig(array $config): array
+    {
+        return $config;
     }
 
     /**
      * Re-uses an existing instance, or creates a new instance (via make) of the Client class.
-     * 
+     *
      * @param array                $config
      * @param GuzzleClient|null    $guzzle
      * @param LoggerInterface|null $logger
@@ -70,13 +90,13 @@ class Hyper
      */
     public static function instance(array $config = [], GuzzleClient $guzzle = null, LoggerInterface $logger = null): Client
     {
-        if (static::$instance === null) {
-            static::$instance = static::make($config, $guzzle, $logger);
+        if (!array_key_exists(static::class, self::$instances)) {
+            static::$instances[static::class] = static::make($config, $guzzle, $logger);
         }
-        
-        return static::$instance;
+
+        return static::$instances[static::class];
     }
-    
+
     /**
      * Make a GET request and return a Response object.
      *
