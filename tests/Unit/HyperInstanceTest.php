@@ -17,7 +17,7 @@ use Rexlabs\HyperHttp\Hyper;
  */
 class HyperInstanceTest extends TestCase
 {
-    public function test_static_calls_share_instance(): void
+    public function test_static_calls_share_instance()
     {
         $one = Hyper::instance();
         $two = Hyper::instance();
@@ -27,7 +27,7 @@ class HyperInstanceTest extends TestCase
         $this->assertNotSame($one, $three);
     }
 
-    public function subclass_does_not_share_instance(): void
+    public function subclass_does_not_share_instance()
     {
         $newHyper = new class extends Hyper {};
         $one = Hyper::instance();
@@ -38,7 +38,7 @@ class HyperInstanceTest extends TestCase
         $this->assertNotSame($one, $three);
     }
 
-    public function test_instantiation_via_make(): void
+    public function test_instantiation_via_make()
     {
         $hyper = Hyper::make();
         $this->assertInstanceOf(Client::class, $hyper);
@@ -47,13 +47,13 @@ class HyperInstanceTest extends TestCase
         $this->assertInstanceOf(LoggerInterface::class, $hyper->getLogger());
     }
 
-    public function test_instantiation_via_make_with_guzzle_config(): void
+    public function test_instantiation_via_make_with_guzzle_config()
     {
         $hyper = Hyper::make(['guzzle' => ['timeout' => 321]]);
         $this->assertContains(['timeout' => 321], $hyper->getGuzzleClient()->getConfig());
     }
 
-    public function test_instantiation_via_make_cannot_provide_guzzle_client_and_config(): void
+    public function test_instantiation_via_make_cannot_provide_guzzle_client_and_config()
     {
         $this->expectException(BadConfigurationException::class);
         Hyper::make(
@@ -62,7 +62,7 @@ class HyperInstanceTest extends TestCase
         );
     }
 
-    public function test_instantiation_with_logger_assigns_logger_middleware(): void
+    public function test_instantiation_with_logger_assigns_logger_middleware()
     {
         $hyper = Hyper::make(['guzzle' => ['timeout' => 321]], null, new NullLogger());
         $this->assertContains([
