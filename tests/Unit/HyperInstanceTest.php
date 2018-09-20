@@ -27,7 +27,7 @@ class HyperInstanceTest extends TestCase
         $this->assertNotSame($one, $three);
     }
 
-    public function subclass_does_not_share_instance()
+    public function test_subclass_does_not_share_instance()
     {
         $newHyper = new class extends Hyper {};
         $one = Hyper::instance();
@@ -36,6 +36,34 @@ class HyperInstanceTest extends TestCase
 
         $this->assertSame($one, $two);
         $this->assertNotSame($one, $three);
+    }
+
+    public function test_clears_instances()
+    {
+        $newHyper = new class extends Hyper {};
+        $hyperOne = Hyper::instance();
+        $hyperTwo = Hyper::instance();
+
+        $newHyperOne = $newHyper::instance();
+        $newHyperTwo = $newHyper::instance();
+
+        $this->assertSame($hyperOne, $hyperTwo);
+        $this->assertSame($newHyperOne, $newHyperTwo);
+        $this->assertNotSame($hyperOne, $newHyperOne);
+
+        Hyper::clearInstances();
+
+        $hyperThree = Hyper::instance();
+        $hyperFour = Hyper::instance();
+
+        $newHyperThree = $newHyper::instance();
+        $newHyperFour = $newHyper::instance();
+
+        $this->assertSame($hyperThree, $hyperFour);
+        $this->assertSame($newHyperThree, $newHyperFour);
+        $this->assertNotSame($hyperThree, $newHyperThree);
+        $this->assertNotSame($hyperOne, $hyperThree);
+        $this->assertNotSame($newHyperOne, $newHyperThree);
     }
 
     public function test_instantiation_via_make()

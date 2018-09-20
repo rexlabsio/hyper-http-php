@@ -28,13 +28,6 @@ class Hyper
     protected static $instances = [];
 
     /**
-     * Override to use subclasses of Client
-     *
-     * @var string
-     */
-    protected static $clientClass = Client::class;
-
-    /**
      * Makes a new instance of the Client class, with appropriate defaults.
      * You can optionally pass in configuration options, a Guzzle client instance and/or a logger.
      *
@@ -305,5 +298,15 @@ class Hyper
     public static function call($method, $uri, $body = null, array $headers = [], array $options = []): Response
     {
         return static::instance()->call($method, $uri, $body, $headers, $options);
+    }
+
+    /**
+     * Clear saved instances from Hyper and subclasses
+     *
+     * @return void
+     */
+    public static function clearInstances()
+    {
+        static::$instances = [];
     }
 }

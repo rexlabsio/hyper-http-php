@@ -1,3 +1,7 @@
+## 2.3.0
+
+- Add clear instances function to reset static data during testing
+
 ## 2.2.0
 
 - Storing separate instances for each subclass of Hyper for static use
