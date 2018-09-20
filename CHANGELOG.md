@@ -1,3 +1,8 @@
+## 2.4.0
+
+- Fix bug where base_uri from subclass was ignored
+- Look for base_uri in subclass or guzzle config or set manually in client
+
 ## 2.3.0
 
 - Add clear instances function to reset static data during testing

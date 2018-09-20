@@ -50,7 +50,7 @@ class Hyper
             throw new BadConfigurationException('Cannot provide both guzzle client and config');
         }
 
-        $baseUri = static::getBaseUri();
+        $baseUri = static::getBaseUri() ?? $guzzleConfig['base_uri'] ?? null;
 
         // May not provide both base_uri and a guzzle client.
         // Since Guzzle is not configurable after initialisation.
@@ -73,11 +73,17 @@ class Hyper
             $guzzleConfig['handler']->push($loggerMiddleware);
         }
 
-        return static::makeClient(
+        $client = static::makeClient(
             $guzzle ?? new GuzzleClient(static::makeGuzzleConfig($guzzleConfig)),
             $logger ?? new NullLogger(),
             static::makeConfig($config)
         );
+
+        if ($baseUri !== null) {
+            $client->setBaseUri($baseUri);
+        }
+
+        return $client;
     }
 
     /**

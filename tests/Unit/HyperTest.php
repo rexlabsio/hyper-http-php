@@ -41,6 +41,60 @@ class HyperTest extends TestCase
         $this->assertEquals('/something', $hyper->url('/something'));
     }
 
+    public function test_base_uri_from_guzzle_config()
+    {
+        $hyper = Hyper::make([
+            'guzzle' => [
+                'base_uri' => 'http://example.com/v1',
+            ]
+        ]);
+
+        // No trailing slash on base
+        $this->assertEquals('http://example.com/v1/something', $hyper->url('something'));
+        $this->assertEquals('http://example.com/v1/something', $hyper->url('/something'));
+
+        // Trailing slash on base
+        $hyper->setBaseUri('http://example.com/v1/');
+        $this->assertEquals('http://example.com/v1/something', $hyper->url('something'));
+        $this->assertEquals('http://example.com/v1/something', $hyper->url('/something'));
+
+        // Absolute URL ignores base URL
+        $hyper->setBaseUri('http://example.com/v1/ignore/me');
+        $this->assertEquals('http://example.com/v2/something', $hyper->url('http://example.com/v2/something'));
+
+        // Empty base URI
+        $hyper->setBaseUri('');
+        $this->assertEquals('/something', $hyper->url('/something'));
+    }
+
+    public function test_base_uri_from_subclass()
+    {
+        $myHyper = new class extends Hyper {
+            protected static function getBaseUri()
+            {
+                return 'http://example.com/v1';
+            }
+        };
+        $hyper = $myHyper::make();
+
+        // No trailing slash on base
+        $this->assertEquals('http://example.com/v1/something', $hyper->url('something'));
+        $this->assertEquals('http://example.com/v1/something', $hyper->url('/something'));
+
+        // Trailing slash on base
+        $hyper->setBaseUri('http://example.com/v1/');
+        $this->assertEquals('http://example.com/v1/something', $hyper->url('something'));
+        $this->assertEquals('http://example.com/v1/something', $hyper->url('/something'));
+
+        // Absolute URL ignores base URL
+        $hyper->setBaseUri('http://example.com/v1/ignore/me');
+        $this->assertEquals('http://example.com/v2/something', $hyper->url('http://example.com/v2/something'));
+
+        // Empty base URI
+        $hyper->setBaseUri('');
+        $this->assertEquals('/something', $hyper->url('/something'));
+    }
+
     public function test_set_config_after_constructor()
     {
         $hyper = Hyper::make();
