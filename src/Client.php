@@ -2,16 +2,12 @@
 
 namespace Rexlabs\HyperHttp;
 
-use Concat\Http\Middleware\Logger;
 use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
-use Psr\Log\NullLogger;
-use Rexlabs\HyperHttp\Exceptions\BadConfigurationException;
 use Rexlabs\HyperHttp\Exceptions\RequestException;
 use Rexlabs\HyperHttp\Exceptions\ResponseException;
 use Rexlabs\HyperHttp\Message\Request;

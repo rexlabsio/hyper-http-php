@@ -28,6 +28,13 @@ class Hyper
     protected static $instances = [];
 
     /**
+     * Override to use subclasses of Client
+     *
+     * @var string
+     */
+    protected static $clientClass = Client::class;
+
+    /**
      * Makes a new instance of the Client class, with appropriate defaults.
      * You can optionally pass in configuration options, a Guzzle client instance and/or a logger.
      *
@@ -50,6 +57,19 @@ class Hyper
             throw new BadConfigurationException('Cannot provide both guzzle client and config');
         }
 
+        $baseUri = static::getBaseUri();
+
+        // May not provide both base_uri and a guzzle client.
+        // Since Guzzle is not configurable after initialisation.
+        if ($baseUri !== null && $guzzle !== null) {
+            throw new BadConfigurationException('Cannot provide both guzzle client and base_uri');
+        }
+
+        // Set base_uri on new guzzle client
+        if ($baseUri !== null) {
+            $guzzleConfig['base_uri'] = $baseUri;
+        }
+
         // Setup logging middleware when a logger is passed.
         if ($guzzle === null && $logger !== null) {
             if (!isset($guzzleConfig['handler'])) {
@@ -60,11 +80,41 @@ class Hyper
             $guzzleConfig['handler']->push($loggerMiddleware);
         }
 
-        return new Client(
-            $guzzle ?? new GuzzleClient(self::makeGuzzleConfig($guzzleConfig)),
+        return static::makeClient(
+            $guzzle ?? new GuzzleClient(static::makeGuzzleConfig($guzzleConfig)),
             $logger ?? new NullLogger(),
-            $config
+            static::makeConfig($config)
         );
+    }
+
+    /**
+     * Override to customise client class
+     *
+     * @param GuzzleClient    $guzzle
+     * @param LoggerInterface $logger
+     * @param array           $config
+     *
+     * @return Client
+     */
+    protected static function makeClient(
+        GuzzleClient $guzzle,
+        LoggerInterface $logger,
+        array $config
+    ): Client {
+        return new Client($guzzle, $logger, $config);
+    }
+
+    /**
+     * Override to customise default client config
+     * eg set default 'headers' to be merged onto every request
+     *
+     * @param array $config
+     *
+     * @return array
+     */
+    protected static function makeConfig(array $config): array
+    {
+        return $config;
     }
 
     /**
@@ -77,6 +127,16 @@ class Hyper
     protected static function makeGuzzleConfig(array $config): array
     {
         return $config;
+    }
+
+    /**
+     * Override to provide a default base_uri to the client
+     *
+     * @return null|string
+     */
+    protected static function getBaseUri()
+    {
+        return null;
     }
 
     /**
