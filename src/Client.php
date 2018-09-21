@@ -587,7 +587,7 @@ class Client implements LoggerAwareInterface
      */
     protected function mergeHeaders(array $headers): array
     {
-        return array_merge_recursive($headers, $this->headers);
+        return array_merge($this->headers, $headers);
     }
 
     /**

@@ -432,6 +432,22 @@ class HyperTest extends TestCase
         ], $request->getFormData());
     }
 
+    public function test_runtime_header_overrides_client_header()
+    {
+        $client = Hyper::make();
+
+        $client->setHeader('Authorization', 'foo');
+
+        $request = $client->createRequest('GET', 'users', [
+            'Authorization' => 'bar',
+        ]);
+
+        $auth = $request->getHeader('Authorization');
+
+        $this->assertContains('bar', $auth);
+        $this->assertNotContains('foo', $auth);
+    }
+
     protected function getMockedGuzzle($statusCode = 200, array $headers = [], $payload = null, $count = 1)
     {
         $queue = [];

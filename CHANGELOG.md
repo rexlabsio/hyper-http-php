@@ -1,3 +1,7 @@
+## 2.4.1
+
+- Fix bug where headers merge instead of overwrite (add test)
+
 ## 2.4.0
 
 - Fix bug where base_uri from subclass was ignored
