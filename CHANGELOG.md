@@ -1,3 +1,9 @@
+# CHANGELOG
+
+## 2.4.2
+
+- Update dependency rexlabs/array-object-php to 2.0.2 (upstream bug)
+
 ## 2.4.1
 
 - Fix bug where headers merge instead of overwrite (add test)

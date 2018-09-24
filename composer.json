@@ -23,7 +23,7 @@
     "psr/log": "^1.0",
     "rexlabs/utility-belt": "^3.0",
     "guzzlehttp/guzzle": "^6.3",
-    "rexlabs/array-object": "^2.0",
+    "rexlabs/array-object": "^2.0.2",
     "rtheunissen/guzzle-log-middleware": "^0.4.1",
     "namshi/cuzzle": "^2.0"
   },
