@@ -92,4 +92,20 @@ class ApiException extends \RuntimeException
 
         return (new CurlFormatter())->format($this->request);
     }
+
+    /**
+     * @return array
+     */
+    public function getResponseArray()
+    {
+        if ($this->response === null) {
+            return [];
+        }
+
+        if ($this->response instanceof Response) {
+            return $this->response->toArray();
+        }
+
+        return \GuzzleHttp\json_decode($this->response->getBody(), true);
+    }
 }

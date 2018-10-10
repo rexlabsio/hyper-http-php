@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.5.0
+
+- Added exception helper methods
+
 ## 2.4.2
 
 - Update dependency rexlabs/array-object-php to 2.0.2 (upstream bug)
