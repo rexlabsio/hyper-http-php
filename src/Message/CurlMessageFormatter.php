@@ -9,8 +9,6 @@ use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class CurlMessageFormatter
- *
- * @package Rexlabs\HyperHttp\Message
  */
 class CurlMessageFormatter extends MessageFormatter
 {
@@ -28,7 +26,7 @@ class CurlMessageFormatter extends MessageFormatter
         ResponseInterface $response = null,
         \Exception $error = null
     ) {
-        return $response ===  null
+        return $response === null
             ? (new CurlFormatter())->format($request)
             : parent::format($request, $response, $error);
     }

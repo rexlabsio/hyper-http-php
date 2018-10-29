@@ -53,7 +53,7 @@ class HyperTest extends TestCase
         $hyper = Hyper::make([
             'guzzle' => [
                 'base_uri' => 'http://example.com/v1',
-            ]
+            ],
         ]);
 
         // No trailing slash on base
@@ -76,7 +76,7 @@ class HyperTest extends TestCase
 
     public function test_base_uri_from_subclass()
     {
-        $myHyper = new class extends Hyper {
+        $myHyper = new class() extends Hyper {
             protected static function getBaseUri()
             {
                 return 'http://example.com/v1';

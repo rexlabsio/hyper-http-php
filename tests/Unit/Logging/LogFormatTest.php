@@ -11,7 +11,7 @@ use Psr\Log\NullLogger;
 use Rexlabs\HyperHttp\Hyper;
 
 /**
- * Class LogFormatTest
+ * Class LogFormatTest.
  */
 class LogFormatTest extends TestCase
 {
@@ -23,13 +23,13 @@ class LogFormatTest extends TestCase
     }
 
     /**
-     * Get a testable dummy logger
+     * Get a testable dummy logger.
      *
      * @return mixed
      */
     private function getTestLogger()
     {
-        return new class extends AbstractLogger {
+        return new class() extends AbstractLogger {
             public $messages = [];
 
             public function log($level, $message, array $context = [])
@@ -59,7 +59,7 @@ class LogFormatTest extends TestCase
         $this->assertNotEmpty($logger->messages);
         $this->assertContains($url, $logger->messages[0]);
         $this->assertStringStartsNotWith('curl', $logger->messages[1]);
-        $this->assertContains((string)$code, $logger->messages[2]);
+        $this->assertContains((string) $code, $logger->messages[2]);
     }
 
     public function test_log_curl()
@@ -71,7 +71,7 @@ class LogFormatTest extends TestCase
         ]));
         $config = [
             'log_curl' => true,
-            'guzzle' => [
+            'guzzle'   => [
                 'handler' => $handlerStack,
             ],
         ];
@@ -83,6 +83,6 @@ class LogFormatTest extends TestCase
         $this->assertNotEmpty($logger->messages);
         $this->assertContains($url, $logger->messages[0]);
         $this->assertStringStartsWith('curl', $logger->messages[1]);
-        $this->assertContains((string)$code, $logger->messages[2]);
+        $this->assertContains((string) $code, $logger->messages[2]);
     }
 }

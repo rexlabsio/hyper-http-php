@@ -23,21 +23,21 @@ use Rexlabs\UtilityBelt\ArrayUtility;
 class Hyper
 {
     /**
-     * One instance per subclass
+     * One instance per subclass.
      *
      * @var array|Client[]
      */
     protected static $instances = [];
 
     /**
-     * Default logger used if not provided
+     * Default logger used if not provided.
      *
      * @var null|LoggerInterface
      */
     protected static $defaultLogger;
 
     /**
-     * Default config data, provided config is merged over
+     * Default config data, provided config is merged over.
      *
      * @var array
      */
@@ -129,7 +129,7 @@ class Hyper
     }
 
     /**
-     * Override to customise client class
+     * Override to customise client class.
      *
      * @param GuzzleClient    $guzzle
      * @param LoggerInterface $logger
@@ -147,7 +147,7 @@ class Hyper
 
     /**
      * Override to customise default client config
-     * eg set default 'headers' to be merged onto every request
+     * eg set default 'headers' to be merged onto every request.
      *
      * @param array $config
      *
@@ -159,7 +159,7 @@ class Hyper
     }
 
     /**
-     * Override to customise default guzzle client
+     * Override to customise default guzzle client.
      *
      * @param array $config
      *
@@ -171,7 +171,7 @@ class Hyper
     }
 
     /**
-     * Override to provide a default base_uri to the client
+     * Override to provide a default base_uri to the client.
      *
      * @return null|string
      */
@@ -349,7 +349,7 @@ class Hyper
     }
 
     /**
-     * Clear saved instances from Hyper and subclasses
+     * Clear saved instances from Hyper and subclasses.
      *
      * @return void
      */

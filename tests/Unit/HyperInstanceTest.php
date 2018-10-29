@@ -12,8 +12,6 @@ use Rexlabs\HyperHttp\Hyper;
 
 /**
  * Class HyperInstanceTest
- *
- * @package Rexlabs\HyperHttp\Tests\Unit
  */
 class HyperInstanceTest extends TestCase
 {
@@ -36,7 +34,8 @@ class HyperInstanceTest extends TestCase
 
     public function test_subclass_does_not_share_instance()
     {
-        $newHyper = new class extends Hyper {};
+        $newHyper = new class extends Hyper {
+        };
         $one = Hyper::instance();
         $two = Hyper::instance();
         $three = $newHyper::instance();
@@ -47,7 +46,8 @@ class HyperInstanceTest extends TestCase
 
     public function test_clears_instances()
     {
-        $newHyper = new class extends Hyper {};
+        $newHyper = new class extends Hyper {
+        };
         $hyperOne = Hyper::instance();
         $hyperTwo = Hyper::instance();
 

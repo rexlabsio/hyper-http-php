@@ -43,23 +43,23 @@ class ConfigTest extends TestCase
     {
         $defaultConfig = [
             'log_curl' => true,
-            'one' => 'one',
-            'nested' => [
+            'one'      => 'one',
+            'nested'   => [
                 'verify' => false,
             ],
         ];
         $overrideConfig = [
             'log_curl' => false,
-            'two' => 'two',
-            'nested' => [
+            'two'      => 'two',
+            'nested'   => [
                 'verify' => true,
             ],
         ];
         $mergedConfig = [
             'log_curl' => false,
-            'one' => 'one',
-            'two' => 'two',
-            'nested' => [
+            'one'      => 'one',
+            'two'      => 'two',
+            'nested'   => [
                 'verify' => true,
             ],
         ];
