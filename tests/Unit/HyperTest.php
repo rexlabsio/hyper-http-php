@@ -353,7 +353,6 @@ class HyperTest extends TestCase
         $this->assertEquals(5678, $response->data->id);
     }
 
-
     public function test_with_headers()
     {
         $mockedGuzzle = $this->getMockedGuzzle(200, [

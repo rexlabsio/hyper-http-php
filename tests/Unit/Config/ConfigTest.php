@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Rexlabs\HyperHttp\Hyper;
 
 /**
- * Class ConfigTest
+ * Class ConfigTest.
  */
 class ConfigTest extends TestCase
 {
