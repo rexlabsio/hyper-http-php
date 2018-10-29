@@ -18,6 +18,13 @@ use Rexlabs\HyperHttp\Message\Response;
 
 class HyperTest extends TestCase
 {
+    protected function setUp()
+    {
+        Hyper::setDefaultConfig([]);
+        Hyper::clearInstances();
+        Hyper::setDefaultLogger(new NullLogger());
+    }
+
     public function test_url()
     {
         $hyper = Hyper::make();

@@ -21,6 +21,7 @@ easily interrogate API responses.
 * You have access to the original `Request` via `$response->getRequest()`.
 * Supports all of [Guzzle client](https://packagist.org/packages/guzzlehttp/guzzle) functionality including streams.
 * Allows you to dump cURL requests for reproducing from the command-line.
+* Easily log all requests
 
 ## Usage
 
@@ -272,7 +273,6 @@ $response = $hyper->call('MOVE', 'myfile1234', ['new_location' => 'some_folder']
 - `$headers` is an optional array of headers (indexed by header name) that will be merged with any global headers.
 - `$options` is an optional array of Guzzle client options.
 
-
 ## Request Methods
 
 Methods available from the `Rexlabs\HyperHttp\Message\Request` object:
@@ -369,6 +369,57 @@ You can also call:
 
 ```php
 $obj = $response->toObject();   // Instance of Arraybject
+```
+
+## Config
+
+Set default config for all client's (defaults to [])
+
+```php
+Hyper::setDefaultConfig($config);
+```
+
+Set config for this client (values will override / merge with default)
+
+```php
+$client = Hyper::make($config);
+```
+
+### Default Logger
+
+Set the default logger used by all clients that don't provide one.  
+Must implement `LoggerInterface` (defaults to `NullLogger`)
+
+```php
+Hyper::setDefaultLogger($logger);
+```
+
+### Log Curl
+
+Log the curl string for all requests (requires a logger set)
+
+```php
+$config = [
+    'log_curl' => true,
+];
+```
+
+### Guzzle config
+
+Set the config passed to the underlying `GuzzleClient`
+
+```php
+$config = [
+    'guzzle' => [
+        'verify' => false,
+    ],
+];
+
+// Set for all clients
+Hyper::setDefaultConfig($config);
+
+// Set for one client
+$client = Hyper::make($config);
 ```
 
 ## Tests

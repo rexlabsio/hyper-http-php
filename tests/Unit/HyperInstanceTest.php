@@ -17,6 +17,13 @@ use Rexlabs\HyperHttp\Hyper;
  */
 class HyperInstanceTest extends TestCase
 {
+    protected function setUp()
+    {
+        Hyper::setDefaultConfig([]);
+        Hyper::clearInstances();
+        Hyper::setDefaultLogger(new NullLogger());
+    }
+
     public function test_static_calls_share_instance()
     {
         $one = Hyper::instance();

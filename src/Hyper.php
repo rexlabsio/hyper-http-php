@@ -9,7 +9,9 @@ use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Rexlabs\HyperHttp\Exceptions\BadConfigurationException;
+use Rexlabs\HyperHttp\Message\CurlMessageFormatter;
 use Rexlabs\HyperHttp\Message\Response;
+use Rexlabs\UtilityBelt\ArrayUtility;
 
 /**
  * Static factory/wrapper for the Hyper Client.
@@ -28,6 +30,20 @@ class Hyper
     protected static $instances = [];
 
     /**
+     * Default logger used if not provided
+     *
+     * @var null|LoggerInterface
+     */
+    protected static $defaultLogger;
+
+    /**
+     * Default config data, provided config is merged over
+     *
+     * @var array
+     */
+    protected static $defaultConfig = [];
+
+    /**
      * Makes a new instance of the Client class, with appropriate defaults.
      * You can optionally pass in configuration options, a Guzzle client instance and/or a logger.
      *
@@ -41,6 +57,7 @@ class Hyper
      */
     public static function make(array $config = [], GuzzleClient $guzzle = null, LoggerInterface $logger = null): Client
     {
+        $config = array_replace_recursive(self::$defaultConfig, $config);
         $guzzleConfig = $config['guzzle'] ?? [];
         unset($config['guzzle']);
 
@@ -63,19 +80,24 @@ class Hyper
             $guzzleConfig['base_uri'] = $baseUri;
         }
 
-        // Setup logging middleware when a logger is passed.
-        if ($guzzle === null && $logger !== null) {
+        // Setup logging middleware
+        $logger = $logger ?? self::$defaultLogger ?? new NullLogger();
+        if ($guzzle === null) {
             if (!isset($guzzleConfig['handler'])) {
                 $guzzleConfig['handler'] = HandlerStack::create();
             }
-            $loggerMiddleware = new Logger($logger);
+            // Add curl request to log if requested
+            $formatter = ArrayUtility::dotRead($config, 'log_curl', false)
+                ? new CurlMessageFormatter()
+                : null;
+            $loggerMiddleware = new Logger($logger, $formatter);
             $loggerMiddleware->setRequestLoggingEnabled();
             $guzzleConfig['handler']->push($loggerMiddleware);
         }
 
         $client = static::makeClient(
             $guzzle ?? new GuzzleClient(static::makeGuzzleConfig($guzzleConfig)),
-            $logger ?? new NullLogger(),
+            $logger ?? $logger,
             static::makeConfig($config)
         );
 
@@ -84,6 +106,26 @@ class Hyper
         }
 
         return $client;
+    }
+
+    /**
+     * @param array
+     *
+     * @return void
+     */
+    public static function setDefaultConfig(array $config)
+    {
+        self::$defaultConfig = $config;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     *
+     * @return void
+     */
+    public static function setDefaultLogger(LoggerInterface $logger)
+    {
+        self::$defaultLogger = $logger;
     }
 
     /**
