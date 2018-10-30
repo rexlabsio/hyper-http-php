@@ -1,10 +1,14 @@
 # CHANGELOG
 
-## 2.5.0
+## 2.6.0
 
 - Add config option to log curl requests
 - Add default config setter
 - Add default logger setter
+
+## 2.5.0
+
+ - Added exception helper methods
 
 ## 2.4.2
 
