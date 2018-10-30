@@ -59,30 +59,33 @@ class Hyper
     {
         $config = array_replace_recursive(self::$defaultConfig, $config);
         $guzzleConfig = $config['guzzle'] ?? [];
+        $baseUri = static::getBaseUri() ?? $guzzleConfig['base_uri'] ?? null;
         unset($config['guzzle']);
 
-        // May not provide both guzzle config and a guzzle client.
-        // Since Guzzle is not configurable after initialisation.
-        if (!empty($guzzleConfig) && $guzzle !== null) {
-            throw new BadConfigurationException('Cannot provide both guzzle client and config');
+
+        // If no logger explicitly provided use the default or null logger.
+        if ($logger === null) {
+            $logger = self::$defaultLogger ?? new NullLogger();
         }
 
-        $baseUri = static::getBaseUri() ?? $guzzleConfig['base_uri'] ?? null;
-
-        // May not provide both base_uri and a guzzle client.
-        // Since Guzzle is not configurable after initialisation.
-        if ($baseUri !== null && $guzzle !== null) {
-            throw new BadConfigurationException('Cannot provide both guzzle client and base_uri');
-        }
-
-        // Set base_uri on new guzzle client
-        if ($baseUri !== null) {
-            $guzzleConfig['base_uri'] = $baseUri;
-        }
-
-        // Setup logging middleware
-        $logger = $logger ?? self::$defaultLogger ?? new NullLogger();
-        if ($guzzle === null) {
+        // We either get provided a guzzle client instance, or possibly an array
+        // of configuration to manually setup a guzzle client.
+        // But we can't have both.
+        if ($guzzle !== null) {
+            // Sanity check - may not provide both guzzle config and a guzzle client.
+            // Since Guzzle is not configurable after initialisation.
+            if (!empty($guzzleConfig)) {
+                throw new BadConfigurationException('Cannot provide both guzzle client and config');
+            }
+            if ($baseUri !== null) {
+                throw new BadConfigurationException('Cannot provide both guzzle client and base_uri');
+            }
+        } else {
+            // If we don't have a guzzle client provided, then we'll setup a configuration
+            // which includes logging middleware.
+            if ($baseUri !== null) {
+                $guzzleConfig['base_uri'] = $baseUri;
+            }
             if (!isset($guzzleConfig['handler'])) {
                 $guzzleConfig['handler'] = HandlerStack::create();
             }
@@ -97,7 +100,7 @@ class Hyper
 
         $client = static::makeClient(
             $guzzle ?? new GuzzleClient(static::makeGuzzleConfig($guzzleConfig)),
-            $logger ?? $logger,
+            $logger,
             static::makeConfig($config)
         );
 
