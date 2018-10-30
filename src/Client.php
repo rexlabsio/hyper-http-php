@@ -357,8 +357,6 @@ class Client implements LoggerAwareInterface
      */
     public function send(Request $request): Response
     {
-        $this->getLogger()->debug(sprintf('Sending: %s %s', $request->getMethod(), $request->getUri()));
-
         // Send the request and get a response object
         $response = Response::fromResponse($this->getGuzzleClient()->send($request, $request->getOptions()));
         $response->setRequest($request);

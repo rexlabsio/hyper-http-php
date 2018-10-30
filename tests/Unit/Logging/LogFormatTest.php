@@ -57,9 +57,8 @@ class LogFormatTest extends TestCase
 
         $this->assertEquals($code, $response->getStatusCode());
         $this->assertNotEmpty($logger->messages);
-        $this->assertContains($url, $logger->messages[0]);
-        $this->assertStringStartsNotWith('curl', $logger->messages[1]);
-        $this->assertContains((string) $code, $logger->messages[2]);
+        $this->assertStringStartsNotWith('curl', $logger->messages[0]);
+        $this->assertContains((string) $code, $logger->messages[1]);
     }
 
     public function test_log_curl()
@@ -81,8 +80,7 @@ class LogFormatTest extends TestCase
 
         $this->assertEquals($code, $response->getStatusCode());
         $this->assertNotEmpty($logger->messages);
-        $this->assertContains($url, $logger->messages[0]);
-        $this->assertStringStartsWith('curl', $logger->messages[1]);
-        $this->assertContains((string) $code, $logger->messages[2]);
+        $this->assertStringStartsWith('curl', $logger->messages[0]);
+        $this->assertContains((string) $code, $logger->messages[1]);
     }
 }

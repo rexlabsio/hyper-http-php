@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.6.1
+
+- Remove redundant log message
+
 ## 2.6.0
 
 - Add config option to log curl requests
