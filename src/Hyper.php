@@ -9,7 +9,9 @@ use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Rexlabs\HyperHttp\Exceptions\BadConfigurationException;
+use Rexlabs\HyperHttp\Message\CurlMessageFormatter;
 use Rexlabs\HyperHttp\Message\Response;
+use Rexlabs\UtilityBelt\ArrayUtility;
 
 /**
  * Static factory/wrapper for the Hyper Client.
@@ -21,11 +23,25 @@ use Rexlabs\HyperHttp\Message\Response;
 class Hyper
 {
     /**
-     * One instance per subclass
+     * One instance per subclass.
      *
      * @var array|Client[]
      */
     protected static $instances = [];
+
+    /**
+     * Default logger used if not provided.
+     *
+     * @var null|LoggerInterface
+     */
+    protected static $defaultLogger;
+
+    /**
+     * Default config data, provided config is merged over.
+     *
+     * @var array
+     */
+    protected static $defaultConfig = [];
 
     /**
      * Makes a new instance of the Client class, with appropriate defaults.
@@ -41,43 +57,48 @@ class Hyper
      */
     public static function make(array $config = [], GuzzleClient $guzzle = null, LoggerInterface $logger = null): Client
     {
+        $config = array_replace_recursive(self::$defaultConfig, $config);
         $guzzleConfig = $config['guzzle'] ?? [];
+        $baseUri = static::getBaseUri() ?? $guzzleConfig['base_uri'] ?? null;
         unset($config['guzzle']);
 
-        // May not provide both guzzle config and a guzzle client.
-        // Since Guzzle is not configurable after initialisation.
-        if (!empty($guzzleConfig) && $guzzle !== null) {
-            throw new BadConfigurationException('Cannot provide both guzzle client and config');
+        // If no logger explicitly provided use the default or null logger.
+        if ($logger === null) {
+            $logger = self::$defaultLogger ?? new NullLogger();
         }
 
-        $baseUri = static::getBaseUri() ?? $guzzleConfig['base_uri'] ?? null;
-
-        // May not provide both base_uri and a guzzle client.
-        // Since Guzzle is not configurable after initialisation.
-        if ($baseUri !== null && $guzzle !== null) {
-            throw new BadConfigurationException('Cannot provide both guzzle client and base_uri');
-        }
-
-        // Set base_uri on new guzzle client
-        if ($baseUri !== null) {
-            $guzzleConfig['base_uri'] = $baseUri;
-        }
-
-        // Setup logging middleware when a logger is passed.
-        if ($guzzle === null && $logger !== null) {
+        // We either get provided a guzzle client instance, or possibly an array
+        // of configuration to manually setup a guzzle client.
+        // But we can't have both.
+        if ($guzzle !== null) {
+            // Sanity check - may not provide both guzzle config and a guzzle client.
+            // Since Guzzle is not configurable after initialisation.
+            if (!empty($guzzleConfig)) {
+                throw new BadConfigurationException('Cannot provide both guzzle client and config');
+            }
+            if ($baseUri !== null) {
+                throw new BadConfigurationException('Cannot provide both guzzle client and base_uri');
+            }
+        } else {
+            // If we don't have a guzzle client provided, then we'll setup a configuration
+            // which includes logging middleware.
+            if ($baseUri !== null) {
+                $guzzleConfig['base_uri'] = $baseUri;
+            }
             if (!isset($guzzleConfig['handler'])) {
                 $guzzleConfig['handler'] = HandlerStack::create();
             }
-            $loggerMiddleware = new Logger($logger);
+            // Add curl request to log if requested
+            $formatter = ArrayUtility::dotRead($config, 'log_curl', false)
+                ? new CurlMessageFormatter()
+                : null;
+            $loggerMiddleware = new Logger($logger, $formatter);
             $loggerMiddleware->setRequestLoggingEnabled();
             $guzzleConfig['handler']->push($loggerMiddleware);
+            $guzzle = new GuzzleClient(static::makeGuzzleConfig($guzzleConfig));
         }
 
-        $client = static::makeClient(
-            $guzzle ?? new GuzzleClient(static::makeGuzzleConfig($guzzleConfig)),
-            $logger ?? new NullLogger(),
-            static::makeConfig($config)
-        );
+        $client = static::makeClient($guzzle, $logger, static::makeConfig($config));
 
         if ($baseUri !== null) {
             $client->setBaseUri($baseUri);
@@ -87,7 +108,27 @@ class Hyper
     }
 
     /**
-     * Override to customise client class
+     * @param array
+     *
+     * @return void
+     */
+    public static function setDefaultConfig(array $config)
+    {
+        self::$defaultConfig = $config;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     *
+     * @return void
+     */
+    public static function setDefaultLogger(LoggerInterface $logger)
+    {
+        self::$defaultLogger = $logger;
+    }
+
+    /**
+     * Override to customise client class.
      *
      * @param GuzzleClient    $guzzle
      * @param LoggerInterface $logger
@@ -105,7 +146,7 @@ class Hyper
 
     /**
      * Override to customise default client config
-     * eg set default 'headers' to be merged onto every request
+     * eg set default 'headers' to be merged onto every request.
      *
      * @param array $config
      *
@@ -117,7 +158,7 @@ class Hyper
     }
 
     /**
-     * Override to customise default guzzle client
+     * Override to customise default guzzle client.
      *
      * @param array $config
      *
@@ -129,7 +170,7 @@ class Hyper
     }
 
     /**
-     * Override to provide a default base_uri to the client
+     * Override to provide a default base_uri to the client.
      *
      * @return null|string
      */
@@ -307,7 +348,7 @@ class Hyper
     }
 
     /**
-     * Clear saved instances from Hyper and subclasses
+     * Clear saved instances from Hyper and subclasses.
      *
      * @return void
      */

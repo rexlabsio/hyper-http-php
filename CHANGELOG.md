@@ -2,7 +2,9 @@
 
 ## 2.5.0
 
-- Added exception helper methods
+- Add config option to log curl requests
+- Add default config setter
+- Add default logger setter
 
 ## 2.4.2
 

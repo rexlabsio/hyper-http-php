@@ -11,12 +11,17 @@ use Rexlabs\HyperHttp\Exceptions\BadConfigurationException;
 use Rexlabs\HyperHttp\Hyper;
 
 /**
- * Class HyperInstanceTest
- *
- * @package Rexlabs\HyperHttp\Tests\Unit
+ * Class HyperInstanceTest.
  */
 class HyperInstanceTest extends TestCase
 {
+    protected function setUp()
+    {
+        Hyper::setDefaultConfig([]);
+        Hyper::clearInstances();
+        Hyper::setDefaultLogger(new NullLogger());
+    }
+
     public function test_static_calls_share_instance()
     {
         $one = Hyper::instance();
@@ -29,7 +34,8 @@ class HyperInstanceTest extends TestCase
 
     public function test_subclass_does_not_share_instance()
     {
-        $newHyper = new class extends Hyper {};
+        $newHyper = new class() extends Hyper {
+        };
         $one = Hyper::instance();
         $two = Hyper::instance();
         $three = $newHyper::instance();
@@ -40,7 +46,8 @@ class HyperInstanceTest extends TestCase
 
     public function test_clears_instances()
     {
-        $newHyper = new class extends Hyper {};
+        $newHyper = new class() extends Hyper {
+        };
         $hyperOne = Hyper::instance();
         $hyperTwo = Hyper::instance();
 
