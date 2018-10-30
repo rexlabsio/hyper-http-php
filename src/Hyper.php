@@ -62,7 +62,6 @@ class Hyper
         $baseUri = static::getBaseUri() ?? $guzzleConfig['base_uri'] ?? null;
         unset($config['guzzle']);
 
-
         // If no logger explicitly provided use the default or null logger.
         if ($logger === null) {
             $logger = self::$defaultLogger ?? new NullLogger();
@@ -96,13 +95,10 @@ class Hyper
             $loggerMiddleware = new Logger($logger, $formatter);
             $loggerMiddleware->setRequestLoggingEnabled();
             $guzzleConfig['handler']->push($loggerMiddleware);
+            $guzzle = new GuzzleClient(static::makeGuzzleConfig($guzzleConfig));
         }
 
-        $client = static::makeClient(
-            $guzzle ?? new GuzzleClient(static::makeGuzzleConfig($guzzleConfig)),
-            $logger,
-            static::makeConfig($config)
-        );
+        $client = static::makeClient($guzzle, $logger, static::makeConfig($config));
 
         if ($baseUri !== null) {
             $client->setBaseUri($baseUri);
