@@ -15,7 +15,7 @@ use Rexlabs\HyperHttp\Hyper;
  */
 class HyperInstanceTest extends TestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         Hyper::setDefaultConfig([]);
         Hyper::clearInstances();
@@ -85,7 +85,9 @@ class HyperInstanceTest extends TestCase
     public function test_instantiation_via_make_with_guzzle_config()
     {
         $hyper = Hyper::make(['guzzle' => ['timeout' => 321]]);
-        $this->assertContains(['timeout' => 321], $hyper->getGuzzleClient()->getConfig());
+        $guzzleConfig = $hyper->getGuzzleClient()->getConfig();
+        $this->assertArrayHasKey('timeout', $guzzleConfig);
+        $this->assertEquals(321, $guzzleConfig['timeout']);
     }
 
     public function test_instantiation_via_make_cannot_provide_guzzle_client_and_config()
@@ -100,9 +102,9 @@ class HyperInstanceTest extends TestCase
     public function test_instantiation_with_logger_assigns_logger_middleware()
     {
         $hyper = Hyper::make(['guzzle' => ['timeout' => 321]], null, new NullLogger());
-        $this->assertContains([
-            'timeout' => 321,
-            'handler',
-        ], $hyper->getGuzzleClient()->getConfig());
+        $guzzleConfig = $hyper->getGuzzleClient()->getConfig();
+        $this->assertArrayHasKey('handler', $guzzleConfig);
+        $this->assertArrayHasKey('timeout', $guzzleConfig);
+        $this->assertEquals(321, $guzzleConfig['timeout']);
     }
 }

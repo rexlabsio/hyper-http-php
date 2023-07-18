@@ -65,7 +65,7 @@ class Client implements LoggerAwareInterface
      */
     public function get($uri, array $query = [], $body = null, array $headers = [], array $options = []): Response
     {
-        return $this->call('GET', $this->makeUri($uri)->withQuery(http_build_query($query, null, '&')), $body,
+        return $this->call('GET', $this->makeUri($uri)->withQuery(http_build_query($query, '', '&')), $body,
             $headers, $options);
     }
 

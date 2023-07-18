@@ -18,7 +18,7 @@ use Rexlabs\HyperHttp\Message\Response;
 
 class HyperTest extends TestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         Hyper::setDefaultConfig([]);
         Hyper::clearInstances();
