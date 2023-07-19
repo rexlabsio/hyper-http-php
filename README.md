@@ -44,16 +44,6 @@ To install in your project:
 composer require rexlabs/hyper-http
 ```
 
-### Dependencies
-
-- PHP 7.0 or above.
-- [guzzlehttp/guzzle](https://packagist.org/packages/guzzlehttp/guzzle)
-- [rexlabs/array-object](https://packagist.org/packages/rexlabs/array-object)
-- [psr/log](https://packagist.org/packages/psr/log)
-- [rtheunissen/guzzle-log-middleware](https://packagist.org/packages/rtheunissen/guzzle-log-middleware)
-- [namshi/cuzzle](https://packagist.org/packages/namshi/cuzzle)
-
-
 ## Examples
 
 The RESTful methods all return a `Response` object which makes interacting with responses simple.
