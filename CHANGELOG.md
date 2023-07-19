@@ -4,6 +4,10 @@
 
 - Add support for PHP 8
 
+## 3.0.0
+
+- Unknown
+
 ## 2.6.1
 
 - Remove redundant log message
