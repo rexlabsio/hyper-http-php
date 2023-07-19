@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 4.0.0
+
+- Drop support for php 7.4
+- Add support for PHP 8
+
 ## 2.6.1
 
 - Remove redundant log message

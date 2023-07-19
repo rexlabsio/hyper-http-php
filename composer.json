@@ -18,26 +18,18 @@
       "email": "jodie.dunlop@rexlabs.com.au"
     }
   ],
-  "repositories": [
-    {
-      "type": "composer",
-      "url": "https://repo.packagist.com/rexsoftware/"
-    },
-    {
-      "packagist.org": false
-    }
-  ],
   "require": {
-    "php": ">=7.2",
-    "psr/log": "^1.0",
-    "rexlabs/utility-belt": "^3.0",
+    "php": ">=7.4 <8.3",
+    "psr/log": "^1.0 || ^2.0 || ^3.0",
+    "rexlabs/utility-belt": "^4.0",
     "guzzlehttp/guzzle": "^7.0",
-    "rexlabs/array-object": "^2.0.2",
+    "guzzlehttp/psr7": "^2.4.0",
+    "rexlabs/array-object": "^3.0",
     "rtheunissen/guzzle-log-middleware": "^1.0",
-    "rexlabs/cuzzle": "^2.1"
+    "rexlabs/cuzzle": "^3.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^6.5.7"
+    "phpunit/phpunit": "^9"
   },
   "autoload": {
     "psr-4": {
