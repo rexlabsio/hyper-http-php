@@ -1,3 +1,11 @@
+# Deprecated
+
+This library isn't in active development.
+
+Please consider [guzzlehttp/guzzle](https://github.com/guzzle/guzzle) or another library instead.
+
+Bug fixes only.
+
 # Hyper Http Client
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
