@@ -1,8 +1,6 @@
 # Hyper Http Client
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://travis-ci.org/rexlabsio/hyper-http-php.svg?branch=master)](https://travis-ci.org/rexlabsio/hyper-http-php)
-[![Code Coverage](https://scrutinizer-ci.com/g/rexlabsio/hyper-http-php/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/rexlabsio/hyper-http-php/?branch=master)
 [![Packagist](https://img.shields.io/packagist/v/rexlabs/hyper-http.svg)](https://packagist.org/packages/rexlabs/hyper-http)
 
 
