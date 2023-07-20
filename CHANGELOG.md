@@ -2,7 +2,12 @@
 
 ## 4.0.0
 
-- Add support for PHP 8
+- Add support for PHP 8.0, 8.1, 8.2
+
+### Breaking Changes
+
+- Drop support for php 7.2 and 7.3
+- setLogger no longer returns self (now returns void) to match interface
 
 ## 3.0.0
 

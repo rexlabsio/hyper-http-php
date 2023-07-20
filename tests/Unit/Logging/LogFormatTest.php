@@ -32,7 +32,7 @@ class LogFormatTest extends TestCase
         return new class() extends AbstractLogger {
             public $messages = [];
 
-            public function log($level, $message, array $context = [])
+            public function log($level, $message, array $context = []): void
             {
                 $this->messages[] = $message;
             }
