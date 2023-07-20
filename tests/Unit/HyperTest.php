@@ -149,7 +149,9 @@ class HyperTest extends TestCase
 
     public function test_fluent_initialisation()
     {
-        $hyper = Hyper::make()->setBaseUri('http://example.com/v1')->setLogger(new NullLogger())->setGuzzleClient(new GuzzleClient());
+        $hyper = Hyper::make()->setBaseUri('http://example.com/v1')
+            ->setGuzzleClient(new GuzzleClient());
+        $hyper->setLogger(new NullLogger());
         $this->assertEquals('http://example.com/v1', $hyper->getBaseUri());
         $this->assertInstanceOf(NullLogger::class, $hyper->getLogger());
         $this->assertInstanceOf(GuzzleClient::class, $hyper->getGuzzleClient());

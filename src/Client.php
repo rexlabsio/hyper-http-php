@@ -402,11 +402,9 @@ class Client implements LoggerAwareInterface
      *
      * @return $this
      */
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(LoggerInterface $logger): void
     {
         $this->logger = $logger;
-
-        return $this;
     }
 
     /**
@@ -559,7 +557,7 @@ class Client implements LoggerAwareInterface
      * @param       $message
      * @param array $context
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         $this->getLogger()->log($level, $message, $context);
     }
