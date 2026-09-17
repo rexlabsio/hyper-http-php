@@ -55,7 +55,7 @@ class Hyper
      *
      * @return Client
      */
-    public static function make(array $config = [], GuzzleClient $guzzle = null, LoggerInterface $logger = null): Client
+    public static function make(array $config = [], ?GuzzleClient $guzzle = null, ?LoggerInterface $logger = null): Client
     {
         $config = array_replace_recursive(self::$defaultConfig, $config);
         $guzzleConfig = $config['guzzle'] ?? [];
@@ -188,7 +188,7 @@ class Hyper
      *
      * @return Client
      */
-    public static function instance(array $config = [], GuzzleClient $guzzle = null, LoggerInterface $logger = null): Client
+    public static function instance(array $config = [], ?GuzzleClient $guzzle = null, ?LoggerInterface $logger = null): Client
     {
         if (!array_key_exists(static::class, self::$instances)) {
             static::$instances[static::class] = static::make($config, $guzzle, $logger);

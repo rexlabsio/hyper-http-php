@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 4.2.0
+* Add support for PHP 8.4, 8.5
+* Implicitly nullable parameters (deprecated in PHP 8.4) are declared nullable
+
 ## 4.0.0
 
 - Add support for PHP 8.0, 8.1, 8.2
